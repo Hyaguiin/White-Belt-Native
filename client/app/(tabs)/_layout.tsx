@@ -7,7 +7,7 @@ export default function RootLayout() {
       <Header />
       <Stack 
       screenOptions={{
-        headerShown: false, // Desativa o cabeçalho em todas as telas
+        headerShown: false, 
       }}
       />
      
