@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Home = () => {
+const Cigar = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <Text style={styles.description}>Bem vindos a Home!.</Text>
+      <Text style={styles.title}>Cigar</Text>
+      <Text style={styles.description}>Cigarros podem ser prejudiciais à saúde.</Text>
     </View>
   );
 };
@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
   },
 });
 
-Home.options = {
-  headerShown: false,
+Cigar.options = {
+  headerShown: false, // Desativa o cabeçalho apenas nesta tela
 };
 
-export default Home;
+export default Cigar;

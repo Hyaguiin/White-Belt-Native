@@ -1,15 +1,11 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from 'react';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Home } from '@/pages/home/home';
+import BottomTabBarNavigator from '@/components/bottomTab/BottomTabNavigator';
 
-
-export default function HomeScreen() {
+export default function App() {
   return (
-    <Home/>
-      
+    <>
+      <BottomTabBarNavigator />
+    </>
   );
 }
