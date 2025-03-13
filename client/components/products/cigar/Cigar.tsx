@@ -1,12 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Header from '@/components/header/Header';
 
 const Cigar = () => {
   return (
+    <>
+    <Header></Header>
     <View style={styles.container}>
       <Text style={styles.title}>Cigar</Text>
       <Text style={styles.description}>Cigarros podem ser prejudiciais à saúde.</Text>
     </View>
+    </>
   );
 };
 

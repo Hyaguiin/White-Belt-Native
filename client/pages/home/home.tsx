@@ -1,12 +1,17 @@
+// app/home.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Header from '@/components/header/Header'; // Cabeçalho personalizado
 
 const Home = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <Text style={styles.description}>Bem vindos a Home!.</Text>
-    </View>
+    <>
+      <Header /> {/* Seu cabeçalho personalizado */}
+      <View style={styles.container}>
+        <Text style={styles.title}>Home</Text>
+        <Text style={styles.description}>Bem-vindo à Home!</Text>
+      </View>
+    </>
   );
 };
 
@@ -27,9 +32,5 @@ const styles = StyleSheet.create({
     color: '#6c757d',
   },
 });
-
-Home.options = {
-  headerShown: false,
-};
 
 export default Home;

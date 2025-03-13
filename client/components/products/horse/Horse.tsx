@@ -1,14 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Header from '@/components/header/Header';
 
 const Horse = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Horse</Text>
-      <Text style={styles.description}>Horses are majestic animals!</Text>
-    </View>
-  );
-};
+ return (
+     <>
+     <Header></Header>
+     <View style={styles.container}>
+       <Text style={styles.title}>Perfil, Fds</Text>
+       <Text style={styles.description}>Seja Low Profile</Text>
+     </View>
+     </>
+   );
+ };
 
 const styles = StyleSheet.create({
   container: {

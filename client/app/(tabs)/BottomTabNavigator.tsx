@@ -26,6 +26,7 @@ export default function BottomTabBarNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} /> 
           ),
+          headerShown: false, // Esconde o cabeçalho aqui
         }}
       />
       <Tab.Screen
@@ -36,6 +37,7 @@ export default function BottomTabBarNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="cart" size={size} color={color} /> 
           ),
+          headerShown: false, // Esconde o cabeçalho aqui
         }}
       />
       <Tab.Screen
@@ -46,6 +48,7 @@ export default function BottomTabBarNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} /> 
           ),
+          headerShown: false, // Esconde o cabeçalho aqui
         }}
       />
     </Tab.Navigator>
