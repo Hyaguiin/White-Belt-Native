@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router'; // Importe o router
+import BottomTabBarNavigator from '@/app/(tabs)/BottomTabNavigator';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,7 +12,7 @@ export default function Login() {
   const handleLogin = () => {
     console.log('Email:', email);
     console.log('Password:', password);
-    router.replace('/(tabs)'); 
+    router.replace('/(tabs)/BottomTabNavigator'); 
   };
 
   return (

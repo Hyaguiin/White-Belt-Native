@@ -2,7 +2,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from '@/pages/login/login' // Ajuste o caminho conforme necessário
-import BottomTabBarNavigator from '@/components/bottomTab/BottomTabNavigator';
+import BottomTabBarNavigator from '@/./app/(tabs)/BottomTabNavigator'
 
 const Stack = createStackNavigator();
 

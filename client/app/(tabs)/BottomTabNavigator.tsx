@@ -2,8 +2,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '@/pages/home/home'; 
-import Cigar from '../products/cigar/Cigar'; 
-import Horse from '../products/horse/Horse'; 
+import Cigar from '@/components/products/cigar/Cigar';
+import Horse from '@/components/products/horse/Horse'; 
 import Ionicons from 'react-native-vector-icons/Ionicons'; 
 
 const Tab = createBottomTabNavigator();
