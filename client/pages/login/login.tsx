@@ -1,21 +1,17 @@
+// app/login/index.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { NavigationProp } from '@react-navigation/native'; // Importe o tipo NavigationProp
+import { useRouter } from 'expo-router'; // Importe o router
 
-
-type LoginScreenProps = {
-  navigation: NavigationProp<any>; 
-};
-
-const Login = ({ navigation }: LoginScreenProps) => { 
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter(); // Inicialize o router
 
   const handleLogin = () => {
-    // Lógica de login aqui
     console.log('Email:', email);
     console.log('Password:', password);
-    navigation.navigate('(tabs)'); 
+    router.replace('/(tabs)'); 
   };
 
   return (
@@ -45,12 +41,12 @@ const Login = ({ navigation }: LoginScreenProps) => {
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('register')}>
+   
         <Text style={styles.link}>Não tem uma conta? Registre-se</Text>
-      </TouchableOpacity>
+      
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -94,5 +90,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default Login;
