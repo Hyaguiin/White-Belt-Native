@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Modal, FlatList } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Modal, FlatList, Animated } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const Header = () => {
   const [modalVisible, setModalVisible] = useState(false); // Controle de visibilidade do modal
+  const scaleAnimCart = useRef(new Animated.Value(1)).current; // Animação separada para o carrinho
+  const scaleAnimSettings = useRef(new Animated.Value(1)).current; // Animação separada para as configurações
 
   // Função para abrir o modal
   const toggleModal = () => {
@@ -11,9 +13,51 @@ export const Header = () => {
   };
 
   // Função para simular a navegação ou ação do botão
-  const handleOptionPress = (option: string) => { // Aqui definimos o tipo de `option` como string
+  const handleOptionPress = (option: string) => {
     console.log(option); // Aqui você pode fazer a lógica para cada opção (por exemplo, Carrinho ou Logout)
     setModalVisible(false); // Fecha o modal
+  };
+
+  // Função para simular a ação do carrinho
+  const handleCartPress = () => {
+    console.log('Abrindo carrinho...');
+    // Lógica do carrinho aqui, como navegação ou exibição de carrinho
+  };
+
+  // Função para animar o ícone de carrinho
+  const animateCartIcon = () => {
+    Animated.sequence([
+      // Aumenta o tamanho
+      Animated.timing(scaleAnimCart, {
+        toValue: 1.2, // Aumenta o tamanho para 1.2x
+        duration: 150, // Duração de 150ms
+        useNativeDriver: true, // Usa o driver nativo para desempenho
+      }),
+      // Volta ao tamanho original
+      Animated.timing(scaleAnimCart, {
+        toValue: 1, // Retorna ao tamanho original
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  // Função para animar o ícone de configurações
+  const animateSettingsIcon = () => {
+    Animated.sequence([
+      // Aumenta o tamanho
+      Animated.timing(scaleAnimSettings, {
+        toValue: 1.2, // Aumenta o tamanho para 1.2x
+        duration: 150, // Duração de 150ms
+        useNativeDriver: true, // Usa o driver nativo para desempenho
+      }),
+      // Volta ao tamanho original
+      Animated.timing(scaleAnimSettings, {
+        toValue: 1, // Retorna ao tamanho original
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   return (
@@ -26,10 +70,34 @@ export const Header = () => {
         <Text style={styles.title}>WhiteBelt</Text>
       </View>
 
-      {/* Botão de Configurações */}
-      <TouchableOpacity style={styles.button} onPress={toggleModal}>
-        <Ionicons name="settings" size={24} color="#FACC15" /> {/* Ícone de configurações */}
-      </TouchableOpacity>
+      {/* Container para os botões */}
+      <View style={styles.buttonsContainer}>
+        {/* Botão de Carrinho */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            handleCartPress();
+            animateCartIcon(); // Anima o ícone de carrinho ao pressioná-lo
+          }}
+        >
+          <Animated.View style={{ transform: [{ scale: scaleAnimCart }] }}>
+            <Ionicons name="cart" size={24} color="#FACC15" /> {/* Ícone de carrinho */}
+          </Animated.View>
+        </TouchableOpacity>
+
+        {/* Botão de Configurações */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            toggleModal();
+            animateSettingsIcon(); // Anima o ícone de configurações ao pressioná-lo
+          }}
+        >
+          <Animated.View style={{ transform: [{ scale: scaleAnimSettings }] }}>
+            <Ionicons name="settings" size={24} color="#FACC15" /> {/* Ícone de configurações */}
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
 
       {/* Modal com as opções Carrinho e Logout */}
       <Modal
@@ -86,8 +154,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  buttonsContainer: {
+    flexDirection: 'row',  // Coloca os botões em linha (horizontal)
+    alignItems: 'center',
+  },
   button: {
     padding: 8,
+    marginLeft: 10,  // Espaçamento entre os botões
   },
   modalOverlay: {
     flex: 1,
