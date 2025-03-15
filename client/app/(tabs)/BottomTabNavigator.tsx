@@ -1,11 +1,10 @@
-// BottomTabBarNavigator.tsx (Ajuste para TypeScript)
 import React from 'react';
 import { TouchableOpacity } from 'react-native'; // Import TouchableOpacity
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'; // Importa o tipo de navegação
-import { ParamListBase } from '@react-navigation/native'; // Importa o tipo de parâmetros para a navegação
-
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { ParamListBase } from '@react-navigation/native';
+import Perfil from '@/pages/profile/Profile';
 import Home from '@/pages/home/home'; 
 import Cigar from '@/components/products/cigar/Cigar';
 import Horse from '@/components/products/horse/Horse'; 
@@ -15,15 +14,15 @@ import ProdutoPage from '@/pages/productsPage/ProductsPage';
 
 // Tipagem para a navegação
 type BottomTabBarNavigatorProps = {
-  navigation: BottomTabNavigationProp<ParamListBase>; // Tipando 'navigation' para usar o tipo adequado
+  navigation: BottomTabNavigationProp<ParamListBase>;
 };
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabBarNavigator({ navigation }: BottomTabBarNavigatorProps) {
   const handleLogout = () => {
-    // Implemente a lógica de logout aqui
-    navigation.navigate('Login'); // Navega para a tela de login
+    // Realiza a navegação para a tela de Login
+    navigation.navigate('Login');
   };
 
   return (
@@ -38,63 +37,69 @@ export default function BottomTabBarNavigator({ navigation }: BottomTabBarNaviga
       {/* Aba Home */}
       <Tab.Screen
         name="Home"
-        component={Home} 
+        component={Home}
         options={{
-          tabBarLabel: 'Home', 
+          tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} /> 
+            <Ionicons name="home" size={size} color={color} />
           ),
-          headerShown: false, // Esconde o cabeçalho aqui
+          headerShown: false,
         }}
       />
 
       {/* Aba Produtos */}
       <Tab.Screen
         name="Products"
-        component={ProdutoPage} 
+        component={ProdutoPage}
         options={{
-          tabBarLabel: 'Produtos', 
+          tabBarLabel: 'Produtos',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart" size={size} color={color} /> 
+            <Ionicons name="cart" size={size} color={color} />
           ),
-          headerShown: false, // Esconde o cabeçalho aqui
+          headerShown: false,
         }}
       />
 
       {/* Aba Perfil */}
       <Tab.Screen
         name="Profile"
-        component={Horse} 
+        component={Perfil}
         options={{
-          tabBarLabel: 'Perfil', 
+          tabBarLabel: 'Perfil',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} /> 
+            <Ionicons name="person" size={size} color={color} />
           ),
-          headerShown: false, // Esconde o cabeçalho aqui
+          headerShown: false,
         }}
       />
 
       {/* Aba Carrinho */}
       <Tab.Screen
         name="Carrinho"
-        component={Carrinho} 
+        component={Carrinho}
         options={{
-          tabBarLabel: 'Carrinho', 
+          tabBarLabel: 'Carrinho',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart-outline" size={size} color={color} /> 
+            <Ionicons name="cart-outline" size={size} color={color} />
           ),
-          headerShown: false, // Esconde o cabeçalho aqui
+          headerShown: false,
         }}
       />
 
-      {/* Aba Logout (sem tela, apenas ação) */}
+      {/* Aba Logout */}
       <Tab.Screen
         name="Logout"
         component={EmptyScreen} // Componente vazio
         options={{
-          tabBarLabel: 'Logout', 
+          tabBarLabel: 'Logout',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="log-out-outline" size={size} color={color} /> 
+            <Ionicons name="log-out-outline" size={size} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <TouchableOpacity 
+              {...props} 
+              onPress={handleLogout} // Passando o handleLogout como onPress
+            />
           ),
         }}
       />
@@ -102,7 +107,7 @@ export default function BottomTabBarNavigator({ navigation }: BottomTabBarNaviga
   );
 }
 
-// Componente vazio para a aba de Logout
+
 function EmptyScreen() {
   return null;
 }

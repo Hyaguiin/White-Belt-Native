@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import Header from '@/components/header/Header';
 
 const usuario = {
   nome: 'Paulin',
@@ -9,11 +10,14 @@ const usuario = {
 
 export default function Perfil() {
   return (
+    <>
+    <Header/>
     <View style={styles.container}>
       <Image source={{ uri: usuario.imagem }} style={styles.imagem} />
       <Text style={styles.nome}>{usuario.nome}</Text>
       <Text style={styles.descricao}>{usuario.descricao}</Text>
     </View>
+    </>
   );
 }
 
@@ -22,7 +26,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
     padding: 20,
   },
   imagem: {
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
   },
   descricao: {
     color: '#FACC15',
-    fontSize: 16,
+    fontSize: 20,    
     textAlign: 'center',
   },
 });
