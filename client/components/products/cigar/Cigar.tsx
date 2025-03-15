@@ -1,39 +1,69 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Header from '@/components/header/Header';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { useCart } from '@/components/cartContext/CartContext';
 
-const Cigar = () => {
-  return (
-    <>
-    <Header></Header>
-    <View style={styles.container}>
-      <Text style={styles.title}>Cigar</Text>
-      <Text style={styles.description}>Cigarros podem ser prejudiciais à saúde.</Text>
-    </View>
-    </>
-  );
+const produto = {
+  id: '1',
+  nome: 'Charuto Imperial',
+  tipo: 'Charuto',
+  preco: 49.99,
+  imagem: 'https://cdn-icons-png.flaticon.com/512/2762/2762885.png',
 };
+
+export default function CharutoPage() {
+  const { adicionarAoCarrinho } = useCart();
+
+  return (
+    <View style={styles.container}>
+      <Image source={{ uri: produto.imagem }} style={styles.imagem} />
+      <Text style={styles.nome}>{produto.nome}</Text>
+      <Text style={styles.preco}>R$ {produto.preco.toFixed(2)}</Text>
+      <Pressable
+        style={({ pressed }) => [styles.botao, pressed && styles.botaoPressionado]}
+        onPress={() => adicionarAoCarrinho(produto)}
+      >
+        <Text style={styles.botaoTexto}>Adicionar ao Carrinho</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    backgroundColor: '#000',
   },
-  title: {
+  imagem: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  nome: {
+    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#343a40',
+    marginBottom: 10,
   },
-  description: {
+  preco: {
+    color: '#FACC15',
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  botao: {
+    backgroundColor: '#FACC15',
+    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  botaoPressionado: {
+    opacity: 0.8,
+  },
+  botaoTexto: {
+    color: '#000',
     fontSize: 16,
-    color: '#6c757d',
+    fontWeight: 'bold',
   },
 });
-
-Cigar.options = {
-  headerShown: false, // Desativa o cabeçalho apenas nesta tela
-};
-
-export default Cigar;

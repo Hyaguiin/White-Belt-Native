@@ -9,7 +9,9 @@ import { ParamListBase } from '@react-navigation/native'; // Importa o tipo de p
 import Home from '@/pages/home/home'; 
 import Cigar from '@/components/products/cigar/Cigar';
 import Horse from '@/components/products/horse/Horse'; 
+import CharutoPage from '@/components/products/cigar/Cigar';
 import Carrinho from '@/pages/carrinho/Carrinho';
+import ProdutoPage from '@/pages/productsPage/ProductsPage';
 
 // Tipagem para a navegação
 type BottomTabBarNavigatorProps = {
@@ -49,7 +51,7 @@ export default function BottomTabBarNavigator({ navigation }: BottomTabBarNaviga
       {/* Aba Produtos */}
       <Tab.Screen
         name="Products"
-        component={Cigar} 
+        component={ProdutoPage} 
         options={{
           tabBarLabel: 'Produtos', 
           tabBarIcon: ({ color, size }) => (
