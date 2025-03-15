@@ -28,7 +28,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           p.id === produto.id ? { ...p, quantidade: p.quantidade + 1 } : p
         );
       }
-      return [...prev, { ...produto, quantidade: 1 }]; // Adiciona a propriedade `quantidade`
+      return [...prev, { ...produto, quantidade: 1 }]; 
     });
   };
 

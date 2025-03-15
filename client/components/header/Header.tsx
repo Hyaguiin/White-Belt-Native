@@ -3,17 +3,17 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, Modal, FlatList } from
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const Header = () => {
-  const [modalVisible, setModalVisible] = useState(false); // Controle de visibilidade do modal
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // Função para abrir o modal
+ 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
 
-  // Função para simular a navegação ou ação do botão
-  const handleOptionPress = (option: string) => { // Aqui definimos o tipo de `option` como string
-    console.log(option); // Aqui você pode fazer a lógica para cada opção (por exemplo, Carrinho ou Logout)
-    setModalVisible(false); // Fecha o modal
+  
+  const handleOptionPress = (option: string) => { 
+    console.log(option); 
+    setModalVisible(false); 
   };
 
   return (
@@ -26,12 +26,12 @@ export const Header = () => {
         <Text style={styles.title}>WhiteBelt</Text>
       </View>
 
-      {/* Botão de Configurações */}
+      
       <TouchableOpacity style={styles.button} onPress={toggleModal}>
-        <Ionicons name="settings" size={24} color="#FACC15" /> {/* Ícone de configurações */}
+        <Ionicons name="settings" size={24} color="#FACC15" /> 
       </TouchableOpacity>
 
-      {/* Modal com as opções Carrinho e Logout */}
+      
       <Modal
         transparent={true}
         visible={modalVisible}
@@ -46,7 +46,7 @@ export const Header = () => {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.option}
-                  onPress={() => handleOptionPress(item)} // Passando corretamente a opção
+                  onPress={() => handleOptionPress(item)} 
                 >
                   <Text style={styles.optionText}>{item}</Text>
                 </TouchableOpacity>
