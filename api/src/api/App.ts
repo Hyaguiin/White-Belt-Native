@@ -6,12 +6,14 @@ import { dbConnection } from "../config/database/Database";
 import cavaloRoutes from "../routes/CavaloRoutes";
 import charutoRoutes from "../routes/CharutoRoutes";
 import whiskyRoutes from "../routes/WhiskyRoutes";
+import carrinhoRoutes from "../routes/CarrinhoRoutes";
 
 export const app = express();
 
 let origins = [
     "http://localhost:5000",
-    "https://hoppscotch.io"
+    "https://hoppscotch.io",
+    '*'
 ]
 
 const corsOptions = {
@@ -23,9 +25,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
-app.use('/cavalos', cavaloRoutes);
-app.use('/charutos', charutoRoutes);
+app.use('/cavalo', cavaloRoutes);
+app.use('/charuto', charutoRoutes);
 app.use('/whisky', whiskyRoutes);
+app.use('/carrinho', carrinhoRoutes);
 
 const startServer = async () => {
   try {
