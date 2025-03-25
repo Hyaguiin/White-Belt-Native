@@ -7,6 +7,7 @@ import cavaloRoutes from "../routes/CavaloRoutes";
 import charutoRoutes from "../routes/CharutoRoutes";
 import whiskyRoutes from "../routes/WhiskyRoutes";
 import carrinhoRoutes from "../routes/CarrinhoRoutes";
+import { criarCarrinhoInicial, verificarCarrinhoExistente } from "../services/CarrinhoService";
 
 export const app = express();
 
@@ -55,3 +56,5 @@ const startServer = async () => {
 };
 
 startServer();
+criarCarrinhoInicial();
+verificarCarrinhoExistente();

@@ -7,7 +7,7 @@ import { WhiskyModel } from "../interfaces/Whisky";
 
 import "dotenv/config";
 
-const CARRINHO_ID_FIXO = process.env.CARRINHO_ID_FIXO || "carrinho-fixo-id"; // ID fixo para o carrinho
+const CARRINHO_ID_FIXO = process.env.CARRINHO_ID_FIXO;
 
 /**
  * Adiciona um produto ao carrinho.
@@ -21,9 +21,8 @@ export const adicionarProdutoAoCarrinho = async (
   tipo: "Charuto" | "Whisky" | "Cavalo"
 ) => {
   try {
-    // Choose the correct model based on type
     let produto;
-    switch(tipo) {
+    switch (tipo) {
       case "Charuto":
         produto = await CharutoModel.findById(produtoId);
         break;
@@ -39,13 +38,18 @@ export const adicionarProdutoAoCarrinho = async (
       throw new Error(`${tipo} com ID ${produtoId} não encontrado`);
     }
 
-    // Rest of your cart logic...
-    let carrinho = await CarrinhoModel.findOne({});
+    let carrinho = await CarrinhoModel.findOne();
     if (!carrinho) {
       carrinho = new CarrinhoModel({
         produtos: [],
-        total: 0
+        produtosModelo: tipo, // Adiciona o tipo do primeiro produto
+        total: 0,
       });
+    }
+
+    // Atualiza o array de modelos se necessário
+    if (!carrinho.produtosModelo) {
+      carrinho.produtosModelo = tipo;
     }
 
     carrinho.produtos.push(produto._id);
@@ -128,20 +132,73 @@ export const calcularTotalCarrinho = async () => {
  */
 export const listarProdutosDoCarrinho = async () => {
   try {
-    console.log("Listando produtos do carrinho..."); // Log para depuração
+    const carrinho = await CarrinhoModel.findOne()
+      .populate({
+        path: "produtos",
+        options: { strictPopulate: false }, // Permite população sem modelo definido
+      })
+      .exec();
 
-    // Buscar o carrinho e popular os produtos
-    const carrinho = await CarrinhoModel.findById(CARRINHO_ID_FIXO).populate<{
-      produtos: Produto[];
-    }>("produtos");
     if (!carrinho) {
       throw new Error("Carrinho não encontrado");
     }
 
-    console.log("Produtos encontrados:", carrinho.produtos); // Log para depuração
-    return carrinho.produtos;
+    // População manual para garantir todos os tipos
+    const produtosPopulados = await Promise.all(
+      carrinho.produtos.map(async (produtoId) => {
+        const charuto = await CharutoModel.findById(produtoId);
+        const cavalo = await CavaloModel.findById(produtoId);
+        const whisky = await WhiskyModel.findById(produtoId);
+        return charuto || cavalo || whisky;
+      })
+    );
+
+    return produtosPopulados.filter(Boolean);
   } catch (err) {
-    console.error("Erro no serviço listarProdutosDoCarrinho:", err); // Log para depuração
+    console.error("Erro ao listar produtos:", err);
     throw err;
   }
 };
+
+export async function criarCarrinhoInicial() {
+  try {
+    const carrinhoId = process.env.CARRINHO_ID_FIXO || "carrinho-fixo-id";
+    console.log("ID do carrinho:", process.env.CARRINHO_ID_FIXO);
+
+    // Verifica se o ID é um ObjectId válido
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(carrinhoId);
+
+    const carrinhoExistente = isObjectId
+      ? await CarrinhoModel.findById(carrinhoId)
+      : await CarrinhoModel.findOne({ _id: carrinhoId });
+
+    if (!carrinhoExistente) {
+      const novoCarrinho = new CarrinhoModel({
+        _id: isObjectId ? new Types.ObjectId(carrinhoId) : carrinhoId,
+        produtos: [],
+        total: 0,
+      });
+      await novoCarrinho.save();
+      console.log("Carrinho inicial criado com sucesso!");
+    }
+  } catch (err) {
+    console.error("Erro ao criar carrinho inicial:", err);
+  }
+}
+
+export async function verificarCarrinhoExistente() {
+  try {
+    const carrinho = await CarrinhoModel.findById(CARRINHO_ID_FIXO);
+    if (!carrinho) {
+      const novoCarrinho = new CarrinhoModel({
+        _id: new Types.ObjectId(CARRINHO_ID_FIXO),
+        produtos: [],
+        total: 0,
+      });
+      await novoCarrinho.save();
+      console.log("Carrinho inicial criado com sucesso!");
+    }
+  } catch (err) {
+    console.error("Erro ao verificar carrinho:", err);
+  }
+}
