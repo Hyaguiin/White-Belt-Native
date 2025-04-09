@@ -8,19 +8,25 @@ import charutoRoutes from "../routes/CharutoRoutes";
 import whiskyRoutes from "../routes/WhiskyRoutes";
 import carrinhoRoutes from "../routes/CarrinhoRoutes";
 import { criarCarrinhoInicial, verificarCarrinhoExistente } from "../services/CarrinhoService";
+import authRoutes from '../routes/AuthRoutes';
 
 export const app = express();
 
-let origins = [
-    "http://localhost:5000",
-    "https://hoppscotch.io",
-    '*'
-]
+
+let url = [
+  'https://hoppscotch.io'
+];
 
 const corsOptions = {
-  origin: origins,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: (origin: string | undefined, callback: Function) => {
+      if (!origin || url.includes(origin)) {
+          callback(null, true);
+      } else {
+          callback(new Error('Not allowed by CORS'), false); 
+      }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
 };
 
 app.use(cors(corsOptions));
@@ -30,6 +36,7 @@ app.use('/cavalo', cavaloRoutes);
 app.use('/charuto', charutoRoutes);
 app.use('/whisky', whiskyRoutes);
 app.use('/carrinho', carrinhoRoutes);
+app.use('/api/auth', authRoutes);
 
 const startServer = async () => {
   try {

@@ -5,7 +5,9 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "ESNext",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node", "bcryptjs", "dotenv"] ,
+   
   },
   "include": ["src"]
 }
