@@ -163,9 +163,6 @@ export const listarProdutosDoCarrinho = async () => {
 export async function criarCarrinhoInicial() {
   try {
     const carrinhoId = process.env.CARRINHO_ID_FIXO || "carrinho-fixo-id";
-    console.log("ID do carrinho:", process.env.CARRINHO_ID_FIXO);
-
-    // Verifica se o ID é um ObjectId válido
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(carrinhoId);
 
     const carrinhoExistente = isObjectId
@@ -176,6 +173,7 @@ export async function criarCarrinhoInicial() {
       const novoCarrinho = new CarrinhoModel({
         _id: isObjectId ? new Types.ObjectId(carrinhoId) : carrinhoId,
         produtos: [],
+        produtosModelo: 'Charuto', // ⬅️ Valor padrão
         total: 0,
       });
       await novoCarrinho.save();
@@ -193,6 +191,7 @@ export async function verificarCarrinhoExistente() {
       const novoCarrinho = new CarrinhoModel({
         _id: new Types.ObjectId(CARRINHO_ID_FIXO),
         produtos: [],
+        produtosModelo: 'Charuto', // ⬅️ Valor padrão
         total: 0,
       });
       await novoCarrinho.save();
