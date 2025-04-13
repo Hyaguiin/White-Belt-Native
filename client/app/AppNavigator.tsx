@@ -1,7 +1,7 @@
 // AppNavigator.js ou onde você configura as navegações
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import Login from '@/pages/login/login'; 
+import Login from '@/app/(tabs)/login'; 
 import BottomTabBarNavigator from '@/app/(tabs)/BottomTabNavigator';
 import Header from '@/components/header/Header';
 

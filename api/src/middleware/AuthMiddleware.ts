@@ -11,7 +11,6 @@ export const protect = async (
   try {
     let token: string | undefined;
 
-    // 1) Verifica se o token existe no header "Authorization"
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }

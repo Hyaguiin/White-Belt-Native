@@ -14,7 +14,8 @@ export const app = express();
 
 
 let url = [
-  'https://hoppscotch.io'
+  'https://hoppscotch.io',
+  'http://localhost:8081',
 ];
 
 const corsOptions = {
