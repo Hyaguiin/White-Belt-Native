@@ -8,6 +8,7 @@ import Perfil from '@/pages/profile/Profile';
 import Home from '@/pages/home/home'; 
 import ProdutoPage from '@/pages/productsPage/ProductsPage';
 import Carrinho from '@/pages/carrinho/Carrinho';
+import Login from './login';
 
 
 type BottomTabBarNavigatorProps = {
@@ -86,7 +87,7 @@ export default function BottomTabBarNavigator({ navigation }: BottomTabBarNaviga
       {/* Aba Logout */}
       <Tab.Screen
         name="Logout"
-        component={EmptyScreen} 
+        component={Login} 
         options={{
           tabBarLabel: 'Logout',
           tabBarIcon: ({ color, size }) => (
