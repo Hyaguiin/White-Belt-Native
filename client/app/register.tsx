@@ -1,57 +1,35 @@
-// app/register.tsx
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
-import { usuarioService } from "@/services/userService";
-import { Usuario } from "@/types/Usuario";
 import { useRouter } from "expo-router";
+import { registrar } from "@/services/userService"; // Alinha com função registrar
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [usuario, setUsuario] = useState<Usuario>({
+  const [usuario, setUsuario] = useState({
     nome: "",
     email: "",
+    cpf: "",
     senha: "",
     imagem: "https://randomuser.me/api/portraits/men/32.jpg",
     cep: "",
-    numeroCasa: null,
-    complemento: null,
     telefone: "",
   });
 
-  const handleInputChange = (campo: keyof Usuario, valor: string) => {
+  const handleInputChange = (campo: keyof typeof usuario, valor: string) => {
     setUsuario((prev) => ({
       ...prev,
-      [campo]: campo === "numeroCasa" ? (valor ? parseInt(valor) : null) : valor,
+      [campo]: valor,
     }));
   };
 
   const validarCampos = () => {
     const { nome, email, senha, cep, telefone } = usuario;
 
-    if (!nome) {
-      Alert.alert("Erro", "Nome é obrigatório");
-      return false;
-    }
-
-    if (!email || !email.includes("@")) {
-      Alert.alert("Erro", "Email inválido");
-      return false;
-    }
-
-    if (senha.length < 6) {
-      Alert.alert("Erro", "Senha deve ter no mínimo 6 caracteres");
-      return false;
-    }
-
-    if (!cep) {
-      Alert.alert("Erro", "CEP é obrigatório");
-      return false;
-    }
-
-    if (!telefone) {
-      Alert.alert("Erro", "Telefone é obrigatório");
-      return false;
-    }
+    if (!nome) return Alert.alert("Erro", "Nome é obrigatório");
+    if (!email || !email.includes("@")) return Alert.alert("Erro", "Email inválido");
+    if (senha.length < 6) return Alert.alert("Erro", "Senha deve ter no mínimo 6 caracteres");
+    if (!cep) return Alert.alert("Erro", "CEP é obrigatório");
+    if (!telefone) return Alert.alert("Erro", "Telefone é obrigatório");
 
     return true;
   };
@@ -60,21 +38,14 @@ export default function RegisterPage() {
     if (!validarCampos()) return;
 
     try {
-      // Verificar se usuário já existe
-      const usuarioExistente = await usuarioService.buscarUsuarioPorEmail(usuario.email);
+      const response = await registrar(usuario);
 
-      if (usuarioExistente) {
-        Alert.alert("Erro", "Já existe um usuário com este email");
-        return;
+      if (response?.status === 201 || response?.status === 200) {
+        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+        router.push("/login");
+      } else {
+        Alert.alert("Erro", response?.data?.message || "Erro ao cadastrar");
       }
-
-      // Salvar usuário
-      await usuarioService.salvarUsuario(usuario);
-
-      Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
-
-      // Redirecionar para login ou home
-      router.push("/login");
     } catch (error) {
       Alert.alert("Erro", "Não foi possível cadastrar o usuário");
     }
@@ -113,28 +84,20 @@ export default function RegisterPage() {
 
         <TextInput
           style={styles.input}
+          placeholder="CPF"
+          placeholderTextColor={"#ccc"}
+          keyboardType="numeric"
+          value={usuario.cpf}
+          onChangeText={(text) => handleInputChange("cpf", text)}
+        />
+
+        <TextInput
+          style={styles.input}
           placeholder="CEP"
           placeholderTextColor={"#ccc"}
           keyboardType="numeric"
           value={usuario.cep}
           onChangeText={(text) => handleInputChange("cep", text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Número da Casa"
-          placeholderTextColor={"#ccc"}
-          keyboardType="numeric"
-          value={usuario.numeroCasa?.toString() || ""}
-          onChangeText={(text) => handleInputChange("numeroCasa", text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Complemento (opcional)"
-          placeholderTextColor={"#ccc"}
-          value={usuario.complemento || ""}
-          onChangeText={(text) => handleInputChange("complemento", text)}
         />
 
         <TextInput

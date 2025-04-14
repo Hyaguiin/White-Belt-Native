@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "@/components/Header";
 import { Usuario } from "@/types/Usuario";
-import { usuarioService } from "@/services/userService";
+import { verificarLogin } from "@/services/userService";
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -12,8 +12,8 @@ export default function Perfil() {
     const carregarDadosUsuario = async () => {
       try {
         // Usa o método verificarLogin do serviço
-        const usuarioLogado = await usuarioService.verificarLogin();
-
+        const usuarioLogado = await verificarLogin();
+        console.log(usuarioLogado)
         if (usuarioLogado) {
           setUsuario(usuarioLogado);
         } else {

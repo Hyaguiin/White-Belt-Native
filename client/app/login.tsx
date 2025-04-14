@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Pressable, Alert, Image } from "react-native";
-import { usuarioService } from "@/services/userService";
+import { login, registrar } from "@/services/userService";
 import { useRouter } from "expo-router";
 import { Usuario } from "@/types/Usuario";
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
     }
 
     try {
-      const usuario = await usuarioService.login(email, senha);
+      const usuario = await login(email, senha);
       Alert.alert("Sucesso", `Bem-vindo, ${usuario.nome}!`);
       router.replace("/");
     } catch (error: any) {

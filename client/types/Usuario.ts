@@ -3,9 +3,9 @@ export interface Usuario {
   nome: string;
   email: string;
   senha: string;
-  imagem: string;
+  cpf: string;
   cep: string;
-  numeroCasa: number | null;
-  complemento: string | null;
   telefone: string;
+  imagem?: string;
+  role?: "admin" | "user";
 }
