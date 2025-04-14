@@ -1,35 +1,43 @@
-// app/home.js
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Header from '@/components/header/Header'; // Cabeçalho personalizado
+// pages/home/home.tsx
+import React from "react";
+import { View, Text, StyleSheet, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from "@/types/Navigation";
+
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 
 const Home = () => {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
+  const goToChat = () => {
+    navigation.navigate("Chat"); 
+  };
+
   return (
-    <>
-      <Header /> {/* Seu cabeçalho personalizado */}
-      <View style={styles.container}>
-        <Text style={styles.title}>Home</Text>
-        <Text style={styles.description}>Bem-vindo à Home!</Text>
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text style={styles.title}>Home</Text>
+      <Text style={styles.description}>Bem-vindo à Home!</Text>
+      <Button title="Ir para o Chat" onPress={goToChat} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#343a40',
+    fontWeight: "bold",
+    color: "#343a40",
   },
   description: {
     fontSize: 16,
-    color: '#6c757d',
+    color: "#6c757d",
   },
 });
 

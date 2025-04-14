@@ -8,7 +8,7 @@ import Perfil from "@/pages/profile/Profile";
 import Home from "@/pages/home/home";
 import ProdutoPage from "@/pages/productsPage/ProductsPage";
 import Carrinho from "@/pages/carrinho/Carrinho";
-import Login from "./login";
+import Chat from "@/pages/chat/Chat";
 import { CarrinhoProvider } from "@/components/cartContext/CartContext";
 
 type BottomTabBarNavigatorProps = {
@@ -27,18 +27,21 @@ export default function BottomTabBarNavigator({
     });
   };
 
+  const itemsInCart = 3; // Aqui você deve pegar o valor dinâmico do carrinho
+
   return (
     <CarrinhoProvider>
       <Tab.Navigator
         initialRouteName="Home"
         screenOptions={{
-          tabBarActiveTintColor: "#FACC15",
-          tabBarInactiveTintColor: "#fff",
+          tabBarActiveTintColor: "#FACC15", // Cor do item ativo
+          tabBarInactiveTintColor: "#fff", // Cor do item inativo
           tabBarStyle: {
-            backgroundColor: "#000",
-            paddingBottom: 5,
+            backgroundColor: "#000", // Cor do fundo da barra
+            paddingBottom: 10,
             borderTopWidth: 0,
-            elevation: 0,
+            elevation: 5, // Sombra da barra
+            height: 70, // Altura da barra
           },
         }}
       >
@@ -78,7 +81,11 @@ export default function BottomTabBarNavigator({
               <Ionicons name="cart" size={size} color={color} />
             ),
             headerShown: false,
-            tabBarBadge: 3, // Opcional: mostrar contagem de itens
+            tabBarBadge: itemsInCart > 0 ? itemsInCart : undefined, // Badge dinâmico
+            tabBarBadgeStyle: {
+              backgroundColor: "#FF6347", // Cor do badge
+              color: "#fff", // Cor do texto dentro do badge
+            },
           }}
         />
 
@@ -95,6 +102,19 @@ export default function BottomTabBarNavigator({
           }}
         />
 
+        {/* Chat */}
+        <Tab.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            tabBarLabel: "Chat",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="chatbubbles" size={size} color={color} />
+            ),
+            headerShown: false,
+          }}
+        />
+
         {/* Logout */}
         <Tab.Screen
           name="Logout"
@@ -104,13 +124,19 @@ export default function BottomTabBarNavigator({
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="log-out" size={size} color={color} />
             ),
+            tabBarButton: () => (
+              <TouchableOpacity onPress={handleLogout}>
+                <Ionicons name="log-out" size={30} color="#FACC15" />
+              </TouchableOpacity>
+            ),
           }}
         />
       </Tab.Navigator>
     </CarrinhoProvider>
   );
 }
-//file
+
+// Função para a tela vazia, utilizada no Logout
 function EmptyScreen() {
   return null;
 }
