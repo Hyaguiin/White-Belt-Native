@@ -110,7 +110,7 @@ export default function BottomTabBarNavigator({
     </CarrinhoProvider>
   );
 }
-
+//file
 function EmptyScreen() {
   return null;
 }
