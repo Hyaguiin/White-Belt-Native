@@ -37,16 +37,17 @@ const adicionarProdutoAoCarrinho = async (produtoId, tipo) => {
         if (!carrinho) {
             carrinho = new Carrinho_1.CarrinhoModel({
                 produtos: [],
-                produtosModelo: tipo, // Adiciona o tipo do primeiro produto
+                produtosModelo: 'Misto', // Agora usamos 'Misto' para carrinhos com múltiplos tipos
                 total: 0,
             });
         }
-        // Atualiza o array de modelos se necessário
-        if (!carrinho.produtosModelo) {
-            carrinho.produtosModelo = tipo;
-        }
+        // Remove a verificação de produtosModelo - não precisamos mais
         carrinho.produtos.push(produto._id);
         carrinho.total += produto.preco;
+        // Verifica se precisa mudar para 'Misto'
+        if (carrinho.produtosModelo !== 'Misto' && carrinho.produtosModelo !== tipo) {
+            carrinho.produtosModelo = 'Misto';
+        }
         await carrinho.save();
         return carrinho;
     }
@@ -115,27 +116,31 @@ exports.calcularTotalCarrinho = calcularTotalCarrinho;
  */
 const listarProdutosDoCarrinho = async () => {
     try {
-        const carrinho = await Carrinho_1.CarrinhoModel.findOne()
-            .populate({
-            path: "produtos",
-            options: { strictPopulate: false }, // Permite população sem modelo definido
-        })
-            .exec();
-        if (!carrinho) {
-            throw new Error("Carrinho não encontrado");
+        const carrinho = await Carrinho_1.CarrinhoModel.findById(CARRINHO_ID_FIXO).exec();
+        if (!carrinho?.produtos?.length)
+            return [];
+        // Se for misto, busca em todos os modelos
+        if (carrinho.produtosModelo === 'Misto') {
+            const charutos = await Charuto_1.CharutoModel.find({ _id: { $in: carrinho.produtos } });
+            const whiskys = await Whisky_1.WhiskyModel.find({ _id: { $in: carrinho.produtos } });
+            const cavalos = await Cavalo_1.CavaloModel.find({ _id: { $in: carrinho.produtos } });
+            return [...charutos, ...whiskys, ...cavalos];
         }
-        // População manual para garantir todos os tipos
-        const produtosPopulados = await Promise.all(carrinho.produtos.map(async (produtoId) => {
-            const charuto = await Charuto_1.CharutoModel.findById(produtoId);
-            const cavalo = await Cavalo_1.CavaloModel.findById(produtoId);
-            const whisky = await Whisky_1.WhiskyModel.findById(produtoId);
-            return charuto || cavalo || whisky;
-        }));
-        return produtosPopulados.filter(Boolean);
+        // Se não for misto, busca no modelo específico
+        switch (carrinho.produtosModelo) {
+            case 'Charuto':
+                return await Charuto_1.CharutoModel.find({ _id: { $in: carrinho.produtos } });
+            case 'Whisky':
+                return await Whisky_1.WhiskyModel.find({ _id: { $in: carrinho.produtos } });
+            case 'Cavalo':
+                return await Cavalo_1.CavaloModel.find({ _id: { $in: carrinho.produtos } });
+            default:
+                return [];
+        }
     }
     catch (err) {
         console.error("Erro ao listar produtos:", err);
-        throw err;
+        return [];
     }
 };
 exports.listarProdutosDoCarrinho = listarProdutosDoCarrinho;
@@ -150,7 +155,7 @@ async function criarCarrinhoInicial() {
             const novoCarrinho = new Carrinho_1.CarrinhoModel({
                 _id: isObjectId ? new mongoose_1.Types.ObjectId(carrinhoId) : carrinhoId,
                 produtos: [],
-                produtosModelo: 'Charuto', // ⬅️ Valor padrão
+                produtosModelo: "Charuto", // ⬅️ Valor padrão
                 total: 0,
             });
             await novoCarrinho.save();
@@ -168,7 +173,7 @@ async function verificarCarrinhoExistente() {
             const novoCarrinho = new Carrinho_1.CarrinhoModel({
                 _id: new mongoose_1.Types.ObjectId(CARRINHO_ID_FIXO),
                 produtos: [],
-                produtosModelo: 'Charuto', // ⬅️ Valor padrão
+                produtosModelo: "Charuto", // ⬅️ Valor padrão
                 total: 0,
             });
             await novoCarrinho.save();

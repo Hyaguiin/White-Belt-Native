@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { CarrinhoModel } from "../interfaces/Carrinho";
-import { Produto } from "../interfaces/Produto";
+import { Produto, ProdutoModel } from "../interfaces/Produto";
 import { CharutoModel } from "../interfaces/Charuto";
 import { CavaloModel } from "../interfaces/Cavalo";
 import { WhiskyModel } from "../interfaces/Whisky";
@@ -42,20 +42,21 @@ export const adicionarProdutoAoCarrinho = async (
     if (!carrinho) {
       carrinho = new CarrinhoModel({
         produtos: [],
-        produtosModelo: tipo, // Adiciona o tipo do primeiro produto
+        produtosModelo: 'Misto', // Agora usamos 'Misto' para carrinhos com múltiplos tipos
         total: 0,
       });
     }
 
-    // Atualiza o array de modelos se necessário
-    if (!carrinho.produtosModelo) {
-      carrinho.produtosModelo = tipo;
-    }
-
+    // Remove a verificação de produtosModelo - não precisamos mais
     carrinho.produtos.push(produto._id);
     carrinho.total += produto.preco;
+    
+    // Verifica se precisa mudar para 'Misto'
+    if (carrinho.produtosModelo !== 'Misto' && carrinho.produtosModelo !== tipo) {
+      carrinho.produtosModelo = 'Misto';
+    }
+    
     await carrinho.save();
-
     return carrinho;
   } catch (err) {
     console.error(`Erro ao adicionar ${tipo}:`, err);
@@ -130,36 +131,36 @@ export const calcularTotalCarrinho = async () => {
  * Lista os produtos do carrinho.
  * @returns A lista de produtos no carrinho.
  */
-export const listarProdutosDoCarrinho = async () => {
+export const listarProdutosDoCarrinho = async (): Promise<any[]> => {
   try {
-    const carrinho = await CarrinhoModel.findOne()
-      .populate({
-        path: "produtos",
-        options: { strictPopulate: false }, // Permite população sem modelo definido
-      })
-      .exec();
+    const carrinho = await CarrinhoModel.findById(CARRINHO_ID_FIXO).exec();
+    
+    if (!carrinho?.produtos?.length) return [];
 
-    if (!carrinho) {
-      throw new Error("Carrinho não encontrado");
+    // Se for misto, busca em todos os modelos
+    if (carrinho.produtosModelo === 'Misto') {
+      const charutos = await CharutoModel.find({ _id: { $in: carrinho.produtos } });
+      const whiskys = await WhiskyModel.find({ _id: { $in: carrinho.produtos } });
+      const cavalos = await CavaloModel.find({ _id: { $in: carrinho.produtos } });
+      return [...charutos, ...whiskys, ...cavalos];
     }
-
-    // População manual para garantir todos os tipos
-    const produtosPopulados = await Promise.all(
-      carrinho.produtos.map(async (produtoId) => {
-        const charuto = await CharutoModel.findById(produtoId);
-        const cavalo = await CavaloModel.findById(produtoId);
-        const whisky = await WhiskyModel.findById(produtoId);
-        return charuto || cavalo || whisky;
-      })
-    );
-
-    return produtosPopulados.filter(Boolean);
+    
+    // Se não for misto, busca no modelo específico
+    switch(carrinho.produtosModelo) {
+      case 'Charuto':
+        return await CharutoModel.find({ _id: { $in: carrinho.produtos } });
+      case 'Whisky':
+        return await WhiskyModel.find({ _id: { $in: carrinho.produtos } });
+      case 'Cavalo':
+        return await CavaloModel.find({ _id: { $in: carrinho.produtos } });
+      default:
+        return [];
+    }
   } catch (err) {
     console.error("Erro ao listar produtos:", err);
-    throw err;
+    return [];
   }
 };
-
 export async function criarCarrinhoInicial() {
   try {
     const carrinhoId = process.env.CARRINHO_ID_FIXO || "carrinho-fixo-id";
@@ -173,7 +174,7 @@ export async function criarCarrinhoInicial() {
       const novoCarrinho = new CarrinhoModel({
         _id: isObjectId ? new Types.ObjectId(carrinhoId) : carrinhoId,
         produtos: [],
-        produtosModelo: 'Charuto', // ⬅️ Valor padrão
+        produtosModelo: "Charuto", // ⬅️ Valor padrão
         total: 0,
       });
       await novoCarrinho.save();
@@ -191,7 +192,7 @@ export async function verificarCarrinhoExistente() {
       const novoCarrinho = new CarrinhoModel({
         _id: new Types.ObjectId(CARRINHO_ID_FIXO),
         produtos: [],
-        produtosModelo: 'Charuto', // ⬅️ Valor padrão
+        produtosModelo: "Charuto", // ⬅️ Valor padrão
         total: 0,
       });
       await novoCarrinho.save();

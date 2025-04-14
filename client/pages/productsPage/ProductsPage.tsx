@@ -3,16 +3,8 @@ import { View, Text, Image, Pressable, StyleSheet, FlatList, ActivityIndicator }
 import { useCart } from '@/components/cartContext/CartContext';
 import { useNavigation } from '@react-navigation/native';
 import Header from '@/components/header/Header';
+import { Produto } from '@/app/interfaces/Produtos';
 import axios from 'axios';
-
-interface Produto {
-  _id: string;
-  nome: string;
-  tipo: "Charuto" | "Whisky" | "Cavalo";
-  preco: number;
-  foto: string;
-  descricao?: string;
-}
 
 export default function ProdutoPage() {
   const { adicionarAoCarrinho } = useCart();

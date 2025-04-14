@@ -1,55 +1,168 @@
-import React, { createContext, useState, useContext } from 'react';
-import { Produto } from '@/app/interfaces/Produtos';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import axios from "axios";
+import { ProdutoNoCarrinho } from "@/interfaces/ProdutoNoCarrinho";
+import { CarrinhoProviderProps } from "@/interfaces/CarrinhoProviderProps";
+import { CarrinhoContextData } from "@/interfaces/FinalizarCompra";
 
 
 
-type CartContextType = {
-  produtos: Produto[];
-  adicionarAoCarrinho: (produto: Omit<Produto, 'quantidade'>) => void;
-  alterarQuantidade: (id: string, operacao: 'incrementar' | 'decrementar') => void;
-};
 
-const CartContext = createContext<CartContextType>({
-  produtos: [],
-  adicionarAoCarrinho: () => {},
-  alterarQuantidade: () => {},
-});
+const CarrinhoContext = createContext<CarrinhoContextData>(
+  {} as CarrinhoContextData
+);
 
-export const useCart = () => useContext(CartContext);
+export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
+  children,
+}) => {
+  const [produtos, setProdutos] = useState<ProdutoNoCarrinho[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [carrinhoId, setCarrinhoId] = useState<string | null>(null);
 
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const carregarCarrinho = async () => {
+    try {
+      const produtosResponse = await axios.get(
+        "http://localhost:5000/carrinho/produto"
+      );
+      const produtosData = produtosResponse.data.map((p: any) => ({
+        ...p,
+        quantidade: 1,
+      }));
 
-  const adicionarAoCarrinho = (produto: Omit<Produto, 'quantidade'>) => {
-    setProdutos((prev) => {
-      const produtoExistente = prev.find((p) => p.id === produto.id);
-      if (produtoExistente) {
-        return prev.map((p) =>
-          p.id === produto.id ? { ...p, quantidade: p.quantidade + 1 } : p
-        );
+      setProdutos(produtosData);
+
+      if (produtosData.length > 0) {
+        await calcularTotal();
       }
-      return [...prev, { ...produto, quantidade: 1 }]; 
-    });
+    } catch (error) {
+      console.error("Erro ao carregar carrinho:", error);
+    }
   };
 
-  const alterarQuantidade = (id: string, operacao: 'incrementar' | 'decrementar') => {
-    setProdutos((prev) =>
-      prev.map((produto) => {
-        if (produto.id === id) {
-          const novaQtd =
-            operacao === 'incrementar'
-              ? produto.quantidade + 1
-              : Math.max(0, produto.quantidade - 1);
-          return { ...produto, quantidade: novaQtd };
-        }
-        return produto;
-      })
-    );
+  const calcularTotal = async () => {
+    try {
+      if (!carrinhoId) return;
+
+      const response = await axios.get(
+        `http://localhost:5000/carrinho/${carrinhoId}/total`
+      );
+      setTotal(response.data.total);
+    } catch (error) {
+      console.error("Erro ao calcular total:", error);
+    }
   };
+
+  const adicionarAoCarrinho = async (produto: ProdutoNoCarrinho) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/carrinho/adicionar",
+        {
+          produtoId: produto._id,
+          tipo: produto.tipo,
+        }
+      );
+
+      if (response.data._id && !carrinhoId) {
+        setCarrinhoId(response.data._id);
+      }
+
+      await carregarCarrinho();
+      await calcularTotal();
+    } catch (error) {
+      console.error("Erro ao adicionar ao carrinho:", error);
+      throw error;
+    }
+  };
+
+  const removerDoCarrinho = async (produtoId: string) => {
+    try {
+      await axios.post("http://localhost:5000/carrinho/remover", {
+        produtoId,
+      });
+
+      await carregarCarrinho();
+      await calcularTotal();
+    } catch (error) {
+      console.error("Erro ao remover do carrinho:", error);
+      throw error;
+    }
+  };
+
+  const alterarQuantidade = async (
+    produtoId: string,
+    operacao: "incrementar" | "decrementar"
+  ) => {
+    try {
+      setProdutos((prevProdutos) =>
+        prevProdutos.map((produto) => {
+          if (produto._id === produtoId) {
+            const novaQuantidade =
+              operacao === "incrementar"
+                ? produto.quantidade + 1
+                : Math.max(1, produto.quantidade - 1);
+
+            if (novaQuantidade === 0) {
+              removerDoCarrinho(produtoId);
+              return produto;
+            }
+
+            return { ...produto, quantidade: novaQuantidade };
+          }
+          return produto;
+        })
+      );
+
+      await calcularTotal();
+    } catch (error) {
+      console.error("Erro ao alterar quantidade:", error);
+      await carregarCarrinho();
+    }
+  };
+
+  const finalizarCompra = async (dadosCompra: {
+    cep: string;
+    cupom: string;
+    produtos: Array<{
+      produtoId: string;
+      tipo: "Charuto" | "Whisky" | "Cavalo";
+      quantidade: number;
+    }>;
+  }) => {
+    try {
+      await axios.post("http://localhost:5000/compras/finalizar", dadosCompra);
+      setProdutos([]);
+      setTotal(0);
+    } catch (error) {
+      console.error("Erro ao finalizar compra:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    carregarCarrinho();
+  }, []);
 
   return (
-    <CartContext.Provider value={{ produtos, adicionarAoCarrinho, alterarQuantidade }}>
+    <CarrinhoContext.Provider
+      value={{
+        produtos,
+        total,
+        adicionarAoCarrinho,
+        removerDoCarrinho,
+        alterarQuantidade,
+        carregarCarrinho,
+        calcularTotal,
+        finalizarCompra,
+      }}
+    >
       {children}
-    </CartContext.Provider>
+    </CarrinhoContext.Provider>
   );
 };
+
+export const useCart = () => useContext(CarrinhoContext);

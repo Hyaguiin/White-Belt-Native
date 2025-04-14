@@ -1,33 +1,68 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Pressable, TextInput } from 'react-native';
-import Header from '@/components/header/Header';
-import { useCart } from '@/components/cartContext/CartContext';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  Pressable,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import Header from "@/components/header/Header";
+import { useCart } from "@/components/cartContext/CartContext";
 
 export default function CarrinhoProdutos() {
-  const { produtos, alterarQuantidade } = useCart();
-  const [cep, setCep] = useState('');
-  const [cupom, setCupom] = useState('');
+  const {
+    produtos = [],
+    total = 0,
+    alterarQuantidade,
+    removerDoCarrinho,
+    finalizarCompra,
+  } = useCart();
+
+  const [cep, setCep] = useState("");
+  const [cupom, setCupom] = useState("");
   const [inputFocus, setInputFocus] = useState({
     cep: false,
     cupom: false,
   });
+  const [loading, setLoading] = useState(false);
 
-  const finalizarCompra = () => {
-    console.log('Finalizando compra...');
+  const handleFinalizarCompra = async () => {
+    try {
+      setLoading(true);
+      await finalizarCompra({
+        cep,
+        cupom,
+        produtos: produtos.map((p) => ({
+          produtoId: p._id,
+          tipo: p.tipo,
+          quantidade: p.quantidade,
+        })),
+      });
+      Alert.alert("Sucesso", "Compra finalizada com sucesso!");
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível finalizar a compra");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const aplicarCupom = () => {
-    console.log('Aplicando cupom...');
+  const handleAplicarCupom = () => {
+    console.log("Aplicando cupom:", cupom);
+    // Implemente a lógica do cupom aqui
   };
 
-  const calcularFrete = () => {
-    console.log('Calculando frete...');
+  const handleCalcularFrete = () => {
+    if (!cep || cep.length < 8) {
+      Alert.alert("CEP inválido", "Digite um CEP válido");
+      return;
+    }
+    console.log("Calculando frete para CEP:", cep);
+    // Implemente o cálculo de frete aqui
   };
-
-  const valorTotal = produtos.reduce(
-    (total, produto) => total + produto.preco * produto.quantidade,
-    0
-  ).toFixed(2);
 
   return (
     <>
@@ -35,107 +70,157 @@ export default function CarrinhoProdutos() {
       <View style={styles.container}>
         <Text style={styles.title}>Carrinho de Compras</Text>
 
-        <FlatList
-          data={produtos}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.produto}>
-              <Image source={{ uri: item.imagem }} style={styles.imagem} />
-              <View style={styles.infoContainer}>
-                <Text style={styles.nome}>{item.nome}</Text>
-                <View style={styles.controles}>
-                  <Pressable
-                    onPress={() => alterarQuantidade(item.id, 'incrementar')}
-                    style={({ pressed }) => [
-                      styles.botao,
-                      pressed && styles.botaoPressionado,
-                    ]}
-                  >
-                    <Text style={styles.botaoTexto}>+</Text>
-                  </Pressable>
+        {!produtos || produtos.length === 0 ? (
+          <View style={styles.carrinhoVazioContainer}>
+            <Text style={styles.carrinhoVazio}>Seu carrinho está vazio</Text>
+          </View>
+        ) : (
+          <>
+            <FlatList
+              data={produtos}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <View style={styles.produto}>
+                  <Image source={{ uri: item.foto }} style={styles.imagem} />
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.nome}>{item.nome}</Text>
+                    <Text style={styles.tipo}>{item.tipo}</Text>
+                    <View style={styles.controles}>
+                      <Pressable
+                        onPress={() =>
+                          alterarQuantidade(item._id, "decrementar")
+                        }
+                        style={({ pressed }) => [
+                          styles.botaoQuantidade,
+                          pressed && styles.botaoPressionado,
+                        ]}
+                      >
+                        <Text style={styles.botaoTexto}>-</Text>
+                      </Pressable>
 
-                  <Text style={styles.quantidade}>{item.quantidade}</Text>
+                      <Text style={styles.quantidade}>{item.quantidade}</Text>
 
-                  <Pressable
-                    onPress={() => alterarQuantidade(item.id, 'decrementar')}
-                    style={({ pressed }) => [
-                      styles.botao,
-                      pressed && styles.botaoPressionado,
-                    ]}
-                  >
-                    <Text style={styles.botaoTexto}>-</Text>
-                  </Pressable>
+                      <Pressable
+                        onPress={() =>
+                          alterarQuantidade(item._id, "incrementar")
+                        }
+                        style={({ pressed }) => [
+                          styles.botaoQuantidade,
+                          pressed && styles.botaoPressionado,
+                        ]}
+                      >
+                        <Text style={styles.botaoTexto}>+</Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={() => removerDoCarrinho(item._id)}
+                        style={({ pressed }) => [
+                          styles.botaoRemover,
+                          pressed && styles.botaoPressionado,
+                        ]}
+                      >
+                        <Text style={styles.botaoTexto}>Remover</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text style={styles.preco}>
+                    R$ {(item.preco * item.quantidade).toFixed(2)}
+                  </Text>
                 </View>
-              </View>
-              <Text style={styles.preco}>
-                R$ {(item.preco * item.quantidade).toFixed(2)}
-              </Text>
-            </View>
-          )}
-        />
+              )}
+              ListFooterComponent={
+                <>
+                  <Text style={styles.valorTotal}>
+                    Subtotal: R$ {total.toFixed(2)}
+                  </Text>
 
-        <Text style={styles.valorTotal}>Valor Total: R$ {valorTotal}</Text>
+                  {/* Bloco CEP + Calcular Frete */}
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>CEP</Text>
+                    <View style={styles.rowInput}>
+                      <TextInput
+                        style={[
+                          styles.inputFlex,
+                          inputFocus.cep && styles.inputFocus,
+                        ]}
+                        placeholder="Digite seu CEP"
+                        placeholderTextColor="#999"
+                        value={cep}
+                        onChangeText={setCep}
+                        onFocus={() =>
+                          setInputFocus({ ...inputFocus, cep: true })
+                        }
+                        onBlur={() =>
+                          setInputFocus({ ...inputFocus, cep: false })
+                        }
+                        keyboardType="numeric"
+                        maxLength={8}
+                      />
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.botaoFlex,
+                          pressed && styles.botaoPressionado,
+                        ]}
+                        onPress={handleCalcularFrete}
+                      >
+                        <Text style={styles.botaoTexto}>Calcular Frete</Text>
+                      </Pressable>
+                    </View>
+                  </View>
 
-        {/* Bloco CEP + Calcular Frete */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>CEP</Text>
-          <View style={styles.rowInput}>
-            <TextInput
-              style={[styles.inputFlex, inputFocus.cep && styles.inputFocus]}
-              placeholder="Digite seu CEP"
-              placeholderTextColor="#999"
-              value={cep}
-              onChangeText={setCep}
-              onFocus={() => setInputFocus({ ...inputFocus, cep: true })}
-              onBlur={() => setInputFocus({ ...inputFocus, cep: false })}
+                  {/* Bloco Cupom + Aplicar */}
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Cupom de Desconto</Text>
+                    <View style={styles.rowInput}>
+                      <TextInput
+                        style={[
+                          styles.inputFlex,
+                          inputFocus.cupom && styles.inputFocus,
+                        ]}
+                        placeholder="Digite seu cupom"
+                        placeholderTextColor="#999"
+                        value={cupom}
+                        onChangeText={setCupom}
+                        onFocus={() =>
+                          setInputFocus({ ...inputFocus, cupom: true })
+                        }
+                        onBlur={() =>
+                          setInputFocus({ ...inputFocus, cupom: false })
+                        }
+                      />
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.botaoFlex,
+                          pressed && styles.botaoPressionado,
+                        ]}
+                        onPress={handleAplicarCupom}
+                      >
+                        <Text style={styles.botaoTexto}>Aplicar</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </>
+              }
             />
-            <Pressable
-              style={({ pressed }) => [
-                styles.botaoFlex,
-                pressed && styles.botaoPressionado,
-              ]}
-              onPress={calcularFrete}
-            >
-              <Text style={styles.botaoTexto}>Calcule o Frete</Text>
-            </Pressable>
-          </View>
-        </View>
 
-        {/* Bloco Cupom + Aplicar */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Cupom de Desconto</Text>
-          <View style={styles.rowInput}>
-            <TextInput
-              style={[styles.inputFlex, inputFocus.cupom && styles.inputFocus]}
-              placeholder="Digite seu cupom"
-              placeholderTextColor="#999"
-              value={cupom}
-              onChangeText={setCupom}
-              onFocus={() => setInputFocus({ ...inputFocus, cupom: true })}
-              onBlur={() => setInputFocus({ ...inputFocus, cupom: false })}
-            />
+            {/* Botão Finalizar Compra */}
             <Pressable
+              onPress={handleFinalizarCompra}
               style={({ pressed }) => [
-                styles.botaoFlex,
+                styles.botaoFinal,
                 pressed && styles.botaoPressionado,
+                loading && styles.botaoDesabilitado,
               ]}
-              onPress={aplicarCupom}
+              disabled={loading}
             >
-              <Text style={styles.botaoTexto}>Aplicar Cupom</Text>
+              {loading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.botaoTextoAntigo}>Finalizar Compra</Text>
+              )}
             </Pressable>
-          </View>
-        </View>
-
-        {/* Botão Finalizar Compra - com animação */}
-        <Pressable
-          onPress={finalizarCompra}
-          style={({ pressed }) => [
-            styles.botaoFinal,
-            pressed && styles.botaoPressionado,
-          ]}
-        >
-          <Text style={styles.botaoTextoAntigo}>Finalizar Compra</Text>
-        </Pressable>
+          </>
+        )}
       </View>
     </>
   );
@@ -144,71 +229,98 @@ export default function CarrinhoProdutos() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     padding: 20,
+  },
+  carrinhoVazioContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  carrinhoVazio: {
+    color: "#FACC15",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   title: {
     fontSize: 26,
-    fontWeight: 'bold',
-    color: '#FACC15',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#FACC15",
+    textAlign: "center",
     marginBottom: 20,
   },
   produto: {
-    flexDirection: 'row',
-    backgroundColor: '#111',
+    flexDirection: "row",
+    backgroundColor: "#111",
     padding: 12,
     borderRadius: 10,
     marginBottom: 15,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   imagem: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 8,
     marginRight: 12,
-    backgroundColor: '#222',
+    backgroundColor: "#222",
   },
   infoContainer: {
     flex: 1,
     marginRight: 10,
   },
   nome: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 6,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  tipo: {
+    color: "#FACC15",
+    fontSize: 14,
+    marginBottom: 8,
   },
   controles: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
-  botao: {
-    backgroundColor: '#FACC15',
+  botaoQuantidade: {
+    backgroundColor: "#FACC15",
+    borderRadius: 5,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  botaoRemover: {
+    backgroundColor: "#ff4444",
     borderRadius: 5,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
+    marginLeft: 10,
   },
   botaoPressionado: {
-    transform: [{ scale: 0.97 }],
-    backgroundColor: '#e0b814',
+    opacity: 0.8,
+  },
+  botaoDesabilitado: {
+    opacity: 0.6,
   },
   botaoTexto: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   quantidade: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     minWidth: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   preco: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#FACC15",
+    fontWeight: "bold",
     fontSize: 16,
     marginLeft: 10,
   },
@@ -216,53 +328,53 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   label: {
-    color: '#FACC15',
+    color: "#FACC15",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   rowInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   inputFlex: {
     flex: 1,
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     borderRadius: 5,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   inputFocus: {
-    borderColor: '#FACC15',
+    borderColor: "#FACC15",
   },
   botaoFlex: {
-    backgroundColor: '#FACC15',
+    backgroundColor: "#FACC15",
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 14,
   },
   botaoFinal: {
     marginTop: 25,
-    backgroundColor: '#FACC15',
+    backgroundColor: "#FACC15",
     borderRadius: 8,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
   botaoTextoAntigo: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 18,
   },
   valorTotal: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'right',
+    fontWeight: "bold",
+    textAlign: "right",
     marginVertical: 10,
   },
 });

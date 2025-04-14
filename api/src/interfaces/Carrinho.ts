@@ -14,9 +14,10 @@ const CarrinhoSchema = new Schema<ICarrinho>({
   }],
   produtosModelo: {
     type: String,
-    enum: ['Charuto', 'Cavalo', 'Whisky'],
+    enum: ['Charuto', 'Cavalo', 'Whisky', 'Misto'], 
     required: true
-  },
+  }
+  ,
   total: { type: Number, default: 0 }
 });
 

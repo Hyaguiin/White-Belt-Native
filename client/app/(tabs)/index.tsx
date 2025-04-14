@@ -1,11 +1,13 @@
+// index.tsx
 import React from 'react';
-import { CartProvider } from '@/components/cartContext/CartContext'; // Ajuste o caminho conforme necessário
-import AppNavigator from '@/app/AppNavigator'; // Ajuste o caminho conforme necessário
+import { CarrinhoProvider } from '@/components/cartContext/CartContext'; // Ajuste o caminho
+import AppNavigator from '@/app/AppNavigator';
+import CarrinhoProdutos from '@/pages/carrinho/Carrinho';
 
 export default function App() {
   return (
-    <CartProvider>
+    <CarrinhoProvider> 
       <AppNavigator />
-    </CartProvider>
+    </CarrinhoProvider>
   );
 }
