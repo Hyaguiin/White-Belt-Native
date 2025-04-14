@@ -5,15 +5,13 @@ import {
   calcularTotalCarrinhoController,
   listarProdutosDoCarrinhoController,
 } from "../controller/CarrinhoController";
+import { autenticarUsuario } from "../middleware/AuthMiddleware";
 
-const router = express.Router();
+const carrinhoRouter = express.Router();
 
-router.post("/adicionar", adicionarProdutoAoCarrinhoController);
+carrinhoRouter.post("/adicionar", autenticarUsuario, adicionarProdutoAoCarrinhoController);
+carrinhoRouter.post("/remover", autenticarUsuario, removerProdutoDoCarrinhoController);
+carrinhoRouter.get("/:carrinhoId/total", autenticarUsuario, calcularTotalCarrinhoController);
+carrinhoRouter.get("/produto/:userId", autenticarUsuario, listarProdutosDoCarrinhoController);
 
-router.post("/remover", removerProdutoDoCarrinhoController);
-
-router.get("/:carrinhoId/total", calcularTotalCarrinhoController);
-
-router.get("/produto", listarProdutosDoCarrinhoController);
-
-export default router;
+export default carrinhoRouter;

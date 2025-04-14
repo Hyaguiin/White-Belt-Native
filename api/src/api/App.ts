@@ -3,19 +3,14 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { Request, Response } from "express";
 import { dbConnection } from "../config/database/Database";
-import cavaloRoutes from "../routes/CavaloRoutes";
-import charutoRoutes from "../routes/CharutoRoutes";
-import whiskyRoutes from "../routes/WhiskyRoutes";
-import carrinhoRoutes from "../routes/CarrinhoRoutes";
-import { criarCarrinhoInicial, verificarCarrinhoExistente } from "../services/CarrinhoService";
+import produtoRouter from "../routes/ProdutoRoutes";
+import carrinhoRouter from "../routes/CarrinhoRoutes";
+import usuarioRouter from "../routes/UsuarioRoutes";
+const PORT = process.env.PORT;
 
 export const app = express();
 
-let origins = [
-    "http://localhost:5000",
-    "https://hoppscotch.io",
-    '*'
-]
+let origins = [`http://localhost:${PORT}`, "https://hoppscotch.io", "*"];
 
 const corsOptions = {
   origin: origins,
@@ -26,10 +21,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
-app.use('/cavalo', cavaloRoutes);
-app.use('/charuto', charutoRoutes);
-app.use('/whisky', whiskyRoutes);
-app.use('/carrinho', carrinhoRoutes);
+app.use("/produtos", produtoRouter);
+app.use("/carrinho", carrinhoRouter);
+app.use("/usuarios", usuarioRouter)
 
 const startServer = async () => {
   try {
@@ -56,5 +50,3 @@ const startServer = async () => {
 };
 
 startServer();
-criarCarrinhoInicial();
-verificarCarrinhoExistente();
