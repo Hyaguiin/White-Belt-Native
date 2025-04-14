@@ -1,25 +1,25 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, ScrollView } from "react-native";
 import Modal from "react-native-modal"; 
 import { criarProduto } from "@/services/Produto"; // Assumindo que o criarProduto está neste caminho
+import { DrawerActions } from "@react-navigation/native"; // Para navegação
+import { useNavigation } from "@react-navigation/native"; // Navegação
 
 const AdicionarProdutosScreen = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false); // Controla o estado do modal
-  const [tipoProduto, setTipoProduto] = useState(""); // Tipo de produto a ser criado
-  const [nome, setNome] = useState(""); // Nome do produto
-  const [preco, setPreco] = useState(""); // Preço do produto
-  const [descricao, setDescricao] = useState(""); // Descrição do produto
-  const [foto, setFoto] = useState(""); // Foto do produto (campo novo)
+  const navigation = useNavigation();
+  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [tipoProduto, setTipoProduto] = useState(""); 
+  const [nome, setNome] = useState(""); 
+  const [preco, setPreco] = useState(""); 
+  const [descricao, setDescricao] = useState(""); 
+  const [foto, setFoto] = useState(""); 
 
-  // Função para mostrar o modal e definir o tipo de produto
   const toggleModal = (tipo: string) => {
-    setTipoProduto(tipo); // Definir o tipo do produto (cavalo, charuto, whisky)
-    setIsModalVisible(true); // Exibir o modal
+    setTipoProduto(tipo); 
+    setIsModalVisible(true); 
   };
 
-  // Função para enviar os dados ao backend
   const handleSubmit = async () => {
-    // Validação simples para garantir que os campos não estão vazios
     if (!nome || !preco || !descricao || !foto) {
       Alert.alert("Erro", "Todos os campos são obrigatórios!");
       return;
@@ -27,28 +27,23 @@ const AdicionarProdutosScreen = () => {
 
     const produtoData = {
       nome,
-      preco: parseFloat(preco), // Convertendo o preço para um número
+      preco: parseFloat(preco), 
       descricao,
       foto,
     };
 
     try {
-      // Enviar os dados para o serviço
       await criarProduto(tipoProduto, produtoData);
-      Alert.alert(
-        "Sucesso",
-        `${tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)} criado com sucesso!`
-      );
-      clearForm(); // Limpar os campos após a criação
-      setIsModalVisible(false); // Fechar o modal
+      Alert.alert("Sucesso", `${tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)} criado com sucesso!`);
+      clearForm(); 
+      setIsModalVisible(false); 
     } catch (error) {
-      if(error instanceof Error){
+      if (error instanceof Error) {
         Alert.alert("Erro", `Erro ao criar produto: ${error.message}`);
       }
     }
   };
 
-  // Função para limpar os campos do formulário
   const clearForm = () => {
     setNome("");
     setPreco("");
@@ -58,35 +53,21 @@ const AdicionarProdutosScreen = () => {
 
   return (
     <View style={styles.container}>
+      
+      
+
       <Text style={styles.title}>Adicionar Produtos</Text>
 
-      {/* Botões para abrir o modal e criar diferentes tipos de produtos */}
-      <View style={styles.buttonGroup}>
-        <Button
-          title="Adicionar Cavalo"
-          onPress={() => toggleModal("cavalo")}
-        />
-        <Button
-          title="Adicionar Charuto"
-          onPress={() => toggleModal("charuto")}
-        />
-        <Button
-          title="Adicionar Whisky"
-          onPress={() => toggleModal("whisky")}
-        />
-      </View>
+      <ScrollView contentContainerStyle={styles.buttonGroup}>
+        <Button title="Adicionar Cavalo" onPress={() => toggleModal("cavalo")} color="#FFC107" />
+        <Button title="Adicionar Charuto" onPress={() => toggleModal("charuto")} color="#FFC107" />
+        <Button title="Adicionar Whisky" onPress={() => toggleModal("whisky")} color="#FFC107" />
+      </ScrollView>
 
-      {/* Modal para Adicionar Produto */}
-      <Modal
-        isVisible={isModalVisible} // Controla a visibilidade do modal
-        onBackdropPress={() => setIsModalVisible(false)} // Fecha o modal ao clicar fora
-      >
+      <Modal isVisible={isModalVisible} onBackdropPress={() => setIsModalVisible(false)}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            Criar {tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)}
-          </Text>
+          <Text style={styles.modalTitle}>Criar {tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)}</Text>
 
-          {/* Campos de input para nome, preço, descrição e foto */}
           <TextInput
             style={styles.input}
             placeholder="Nome"
@@ -113,14 +94,14 @@ const AdicionarProdutosScreen = () => {
             onChangeText={setFoto}
           />
 
-          {/* Botão para submeter o formulário */}
-          <Button
-            title={`Criar ${tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)}`}
-            onPress={handleSubmit}
-          />
-
-          {/* Botão para fechar o modal */}
-          <Button title="Fechar" onPress={() => setIsModalVisible(false)} />
+          <View style={styles.modalActions}>
+            <Button
+              title={`Criar ${tipoProduto.charAt(0).toUpperCase() + tipoProduto.slice(1)}`}
+              onPress={handleSubmit}
+              color="#4CAF50"
+            />
+            <Button title="Fechar" onPress={() => setIsModalVisible(false)} color="#f44336" />
+          </View>
         </View>
       </Modal>
     </View>
@@ -130,34 +111,47 @@ const AdicionarProdutosScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     padding: 20,
+    backgroundColor: "#f5f5f5",
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
+    color: "#333",
   },
   buttonGroup: {
     marginBottom: 20,
+    paddingHorizontal: 10,
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
+    elevation: 5,
+    minWidth: 300,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#333",
   },
   input: {
-    height: 40,
-    borderColor: "gray",
+    height: 50,
+    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
     borderRadius: 5,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    fontSize: 16,
+  },
+  modalActions: {
+    marginTop: 20,
+    justifyContent: "space-between",
   },
 });
 
