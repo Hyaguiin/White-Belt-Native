@@ -17,7 +17,7 @@ const API_BASE_URL = __DEV__
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  //timeout: 10000
 });
 
 const CarrinhoContext = createContext<CarrinhoContextData>(
@@ -151,9 +151,7 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     }
   };
 
-  useEffect(() => {
-    carregarCarrinho();
-  }, []);
+
 
   return (
     <CarrinhoContext.Provider
