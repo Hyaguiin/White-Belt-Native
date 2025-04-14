@@ -21,9 +21,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
+app.use("/", (req: Request, res: Response) => {
+  res.status(200).send({
+    message: "API Rodando com sucesso!",
+  });
+});
 app.use("/produtos", produtoRouter);
 app.use("/carrinho", carrinhoRouter);
-app.use("/usuarios", usuarioRouter)
+app.use("/usuarios", usuarioRouter);
 
 const startServer = async () => {
   try {
