@@ -10,3 +10,4 @@ type ProdutoBase = {
 type Produto = ProdutoBase & {
   quantidade: number;
 };
+export default ProdutoBase;

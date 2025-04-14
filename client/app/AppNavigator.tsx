@@ -10,7 +10,6 @@ const Stack = createStackNavigator();
 
 export default function AppNavigator() {
   return (
-    // O CarrinhoProvider envolve toda a navegação para garantir que o contexto esteja acessível
     <CarrinhoProvider>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen

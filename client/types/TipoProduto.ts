@@ -1,0 +1,1 @@
+export type TipoProduto = "Charuto" | "Whisky" | "Cavalo" | "Misto";

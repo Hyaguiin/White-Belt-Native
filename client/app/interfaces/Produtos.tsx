@@ -1,4 +1,4 @@
-export type Produto = {
+ type Produto = {
     id: string;
     nome: string;
     tipo: string;
@@ -6,4 +6,4 @@ export type Produto = {
     preco: number;
     imagem: string;
   };
-  
+  export default Produto;

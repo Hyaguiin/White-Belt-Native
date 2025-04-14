@@ -9,9 +9,16 @@ import axios from "axios";
 import { ProdutoNoCarrinho } from "@/interfaces/ProdutoNoCarrinho";
 import { CarrinhoProviderProps } from "@/interfaces/CarrinhoProviderProps";
 import { CarrinhoContextData } from "@/interfaces/FinalizarCompra";
+import { AxiosError } from "axios";
 
+const API_BASE_URL = __DEV__
+  ? "http://localhost:5000"
+  : "https://seuservidor.com";
 
-
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
 
 const CarrinhoContext = createContext<CarrinhoContextData>(
   {} as CarrinhoContextData
@@ -23,38 +30,35 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
   const [produtos, setProdutos] = useState<ProdutoNoCarrinho[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [carrinhoId, setCarrinhoId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const carregarCarrinho = async () => {
+    setLoading(true);
     try {
-      const produtosResponse = await axios.get("http://localhost:5000/carrinho/produto");
-      console.log("Resposta da API:", produtosResponse.data); // Verifique os dados da resposta da API
-  
-      // Mapear os produtos para adicionar a quantidade
-      const produtosData = produtosResponse.data.map((p: any) => ({
-        ...p,
-        quantidade: 1, // Adiciona a quantidade inicial
-      }));
-  
-      // Atualiza o estado com os produtos carregados
-      setProdutos(produtosData);
-  
-      // Se houver produtos, calcula o total
-      if (produtosData.length > 0) {
-        await calcularTotal();
+      const carrinhoResponse = await api.get(`${API_BASE_URL}/carrinho/produto`);
+      if (Array.isArray(carrinhoResponse.data)) {
+        const produtosComQuantidade = carrinhoResponse.data.map((produto: any) => ({
+          ...produto,
+          quantidade: 1, // Exemplo, você pode ajustar a lógica aqui
+          tipo: "Misto", // Ajuste conforme a lógica dos tipos
+        }));
+        setProdutos(produtosComQuantidade);
       }
     } catch (error) {
-      console.error("Erro ao carregar carrinho:", error);
+      console.error("Erro ao carregar o carrinho:", error);
+    } finally {
+      setLoading(false);
     }
   };
-  
-  
+
+ 
 
   const calcularTotal = async () => {
     try {
       if (!carrinhoId) return;
 
       const response = await axios.get(
-        `http://localhost:5000/carrinho/${carrinhoId}/total`
+        `${API_BASE_URL}/carrinho/${carrinhoId}/total`
       );
       setTotal(response.data.total);
     } catch (error) {
@@ -64,13 +68,10 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
 
   const adicionarAoCarrinho = async (produto: ProdutoNoCarrinho) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/carrinho/adicionar",
-        {
-          produtoId: produto._id,
-          tipo: produto.tipo,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/carrinho/adicionar`, {
+        produtoId: produto._id,
+        tipo: produto.tipo,
+      });
 
       if (response.data._id && !carrinhoId) {
         setCarrinhoId(response.data._id);
@@ -86,7 +87,7 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
 
   const removerDoCarrinho = async (produtoId: string) => {
     try {
-      await axios.post("http://localhost:5000/carrinho/remover", {
+      await axios.post(`${API_BASE_URL}/carrinho/remover`, {
         produtoId,
       });
 
@@ -95,6 +96,8 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     } catch (error) {
       console.error("Erro ao remover do carrinho:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,7 +142,7 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     }>;
   }) => {
     try {
-      await axios.post("http://localhost:5000/compras/finalizar", dadosCompra);
+      await axios.post(`${API_BASE_URL}/compras/finalizar`, dadosCompra);
       setProdutos([]);
       setTotal(0);
     } catch (error) {
@@ -157,10 +160,10 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
       value={{
         produtos,
         total,
+        carregarCarrinho, // Garanta que está incluída aqui
         adicionarAoCarrinho,
         removerDoCarrinho,
         alterarQuantidade,
-        carregarCarrinho,
         calcularTotal,
         finalizarCompra,
       }}
@@ -169,5 +172,4 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     </CarrinhoContext.Provider>
   );
 };
-
-export const useCart = () => useContext(CarrinhoContext);
+  export const useCart = () => useContext(CarrinhoContext);

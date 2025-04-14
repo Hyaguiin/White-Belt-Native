@@ -19,9 +19,13 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTabBarNavigator({ navigation }: BottomTabBarNavigatorProps) {
   
-  const handleLogout = () => {
-    navigation.navigate('Login'); 
-  };
+const handleLogout = () => {
+  navigation.reset({
+    index: 0,
+    routes: [{ name: 'Login' }],
+  });
+};
+
 
   return (
     <Tab.Navigator
@@ -87,7 +91,7 @@ export default function BottomTabBarNavigator({ navigation }: BottomTabBarNaviga
       {/* Aba Logout */}
       <Tab.Screen
         name="Logout"
-        component={Login} 
+        component={EmptyScreen} 
         options={{
           tabBarLabel: 'Logout',
           tabBarIcon: ({ color, size }) => (

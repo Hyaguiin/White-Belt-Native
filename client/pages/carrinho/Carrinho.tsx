@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,12 +12,15 @@ import {
 } from "react-native";
 import Header from "@/components/header/Header";
 import { useCart } from "@/components/cartContext/CartContext";
+import { TipoProduto } from "@/types/TipoProduto"; // Verifique se TipoProduto ainda é necessário
+import { PedidoProduto } from "@/types/PedidoProduto"; // Verifique se PedidoProduto ainda é necessário
 
 export default function CarrinhoProdutos() {
   const {
     produtos = [],
     total = 0,
     alterarQuantidade,
+    carregarCarrinho,  
     removerDoCarrinho,
     finalizarCompra,
   } = useCart();
@@ -30,18 +33,28 @@ export default function CarrinhoProdutos() {
   });
   const [loading, setLoading] = useState(false);
 
+  // Carregar o carrinho assim que o componente for montado
+  useEffect(() => {
+    carregarCarrinho();  // Chama a função para carregar os produtos do carrinho
+  }, [carregarCarrinho]);
+
   const handleFinalizarCompra = async () => {
     try {
       setLoading(true);
+
       await finalizarCompra({
         cep,
         cupom,
         produtos: produtos.map((p) => ({
           produtoId: p._id,
-          tipo: p.tipo,
+          tipo:
+            p.tipo === "Misto"
+              ? "Charuto" // Mapeia o tipo "Misto" para "Charuto" ou outro valor válido
+              : (p.tipo as "Charuto" | "Whisky" | "Cavalo"), // Garante que o tipo seja válido
           quantidade: p.quantidade,
         })),
       });
+
       Alert.alert("Sucesso", "Compra finalizada com sucesso!");
     } catch (error) {
       Alert.alert("Erro", "Não foi possível finalizar a compra");
@@ -52,7 +65,6 @@ export default function CarrinhoProdutos() {
 
   const handleAplicarCupom = () => {
     console.log("Aplicando cupom:", cupom);
-    // Implemente a lógica do cupom aqui
   };
 
   const handleCalcularFrete = () => {
@@ -61,7 +73,6 @@ export default function CarrinhoProdutos() {
       return;
     }
     console.log("Calculando frete para CEP:", cep);
-    // Implemente o cálculo de frete aqui
   };
 
   return (
@@ -84,7 +95,7 @@ export default function CarrinhoProdutos() {
                   <Image source={{ uri: item.foto }} style={styles.imagem} />
                   <View style={styles.infoContainer}>
                     <Text style={styles.nome}>{item.nome}</Text>
-                    <Text style={styles.tipo}>{item.tipo}</Text>
+                    <Text style={styles.tipo}></Text>
                     <View style={styles.controles}>
                       <Pressable
                         onPress={() =>
@@ -139,20 +150,13 @@ export default function CarrinhoProdutos() {
                     <Text style={styles.label}>CEP</Text>
                     <View style={styles.rowInput}>
                       <TextInput
-                        style={[
-                          styles.inputFlex,
-                          inputFocus.cep && styles.inputFocus,
-                        ]}
+                        style={[styles.inputFlex, inputFocus.cep && styles.inputFocus]}
                         placeholder="Digite seu CEP"
                         placeholderTextColor="#999"
                         value={cep}
                         onChangeText={setCep}
-                        onFocus={() =>
-                          setInputFocus({ ...inputFocus, cep: true })
-                        }
-                        onBlur={() =>
-                          setInputFocus({ ...inputFocus, cep: false })
-                        }
+                        onFocus={() => setInputFocus({ ...inputFocus, cep: true })}
+                        onBlur={() => setInputFocus({ ...inputFocus, cep: false })}
                         keyboardType="numeric"
                         maxLength={8}
                       />
@@ -173,20 +177,13 @@ export default function CarrinhoProdutos() {
                     <Text style={styles.label}>Cupom de Desconto</Text>
                     <View style={styles.rowInput}>
                       <TextInput
-                        style={[
-                          styles.inputFlex,
-                          inputFocus.cupom && styles.inputFocus,
-                        ]}
+                        style={[styles.inputFlex, inputFocus.cupom && styles.inputFocus]}
                         placeholder="Digite seu cupom"
                         placeholderTextColor="#999"
                         value={cupom}
                         onChangeText={setCupom}
-                        onFocus={() =>
-                          setInputFocus({ ...inputFocus, cupom: true })
-                        }
-                        onBlur={() =>
-                          setInputFocus({ ...inputFocus, cupom: false })
-                        }
+                        onFocus={() => setInputFocus({ ...inputFocus, cupom: true })}
+                        onBlur={() => setInputFocus({ ...inputFocus, cupom: false })}
                       />
                       <Pressable
                         style={({ pressed }) => [
