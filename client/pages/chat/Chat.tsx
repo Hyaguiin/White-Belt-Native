@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  FlatList,
+  StyleSheet,
+  Alert,
+  Image,
+} from "react-native";
+import Header from "@/components/header/Header";
 
 interface Message {
   text: string;
@@ -11,9 +21,13 @@ const WS_PORT = 6500; // Certifique-se que esta porta corresponde ao servidor
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { text: "Procurando Algum Cavalo ou Charuto de Respeito? Beba Whisky até cair que nem Ramon.", sender: "Tombi Xelbo" }
+    {
+      text: "Procurando Algum Cavalo ou Charuto de Respeito? Beba Whisky até cair que nem Ramon.",
+      sender: "Tombi Xelbo",
+    },
   ]);
   const [input, setInput] = useState<string>("");
+
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
@@ -30,7 +44,10 @@ const Chat: React.FC = () => {
     socket.onmessage = (event) => {
       const response = event.data;
       if (response) {
-        setMessages(prev => [...prev, { text: response, sender: "Tombi Xelbo" }]);
+        setMessages((prev) => [
+          ...prev,
+          { text: response, sender: "Tombi Xelbo" },
+        ]);
       }
     };
 
@@ -64,8 +81,8 @@ const Chat: React.FC = () => {
     }
 
     try {
-      setMessages(prev => [...prev, { text: input, sender: "Você" }]);
-      
+      setMessages((prev) => [...prev, { text: input, sender: "Você" }]);
+
       wsRef.current.send(input);
       setInput("");
     } catch (error) {
@@ -75,51 +92,58 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.status}>
-        Status: {isConnected ? "Conectado" : "Desconectado"}
-      </Text>
-      
-      <FlatList
-        data={messages}
-        renderItem={({ item }) => (
-          <View style={[
-            styles.messageContainer, 
-            item.sender === "Você" ? styles.userMessage : styles.iaMessage
-          ]}>
-            {item.sender === "Tombi Xelbo" && (
-              <Image
-                source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI0OS8Ld6-cVenXqxa9mJZaFNMV56iABFNhQ&s' }} // Ou use uma imagem local, ex: require('./assets/ia-image.png')
-                style={styles.iaImage}
-              />
-            )}
-            <View style={styles.textContainer}>
-              <Text style={styles.sender}>{item.sender}:</Text>
-              <Text style={styles.messageText}>{item.text}</Text>
-            </View>
-          </View>
-        )}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={styles.messagesContainer}
-      />
+    <>
+      <Header />
+      <View style={styles.container}>
+        <Text style={styles.status}>
+          Status: {isConnected ? "Conectado" : "Desconectado"}
+        </Text>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Digite sua mensagem..."
-          placeholderTextColor="#6c757d"
-          onSubmitEditing={sendMessage}
+        <FlatList
+          data={messages}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.messageContainer,
+                item.sender === "Você" ? styles.userMessage : styles.iaMessage,
+              ]}
+            >
+              {item.sender === "Tombi Xelbo" && (
+                <Image
+                  source={{
+                    uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI0OS8Ld6-cVenXqxa9mJZaFNMV56iABFNhQ&s",
+                  }} // Ou use uma imagem local, ex: require('./assets/ia-image.png')
+                  style={styles.iaImage}
+                />
+              )}
+              <View style={styles.textContainer}>
+                <Text style={styles.sender}>{item.sender}:</Text>
+                <Text style={styles.messageText}>{item.text}</Text>
+              </View>
+            </View>
+          )}
+          keyExtractor={(_, index) => index.toString()}
+          contentContainerStyle={styles.messagesContainer}
         />
-        <Button 
-          title="Enviar" 
-          onPress={sendMessage} 
-          color="#FACC15"
-          disabled={!isConnected}
-        />
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Digite sua mensagem..."
+            placeholderTextColor="#6c757d"
+            onSubmitEditing={sendMessage}
+          />
+          <Button
+            title="Enviar"
+            onPress={sendMessage}
+            color="#FACC15"
+            disabled={!isConnected}
+          />
+        </View>
       </View>
-    </View>
+    </>
   );
 };
 
@@ -127,66 +151,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#000', 
+    backgroundColor: "#000",
+    top: 40,
   },
   status: {
-    textAlign: 'center',
-    color: '#666',
+    textAlign: "center",
+    color: "#666",
     marginBottom: 8,
     fontSize: 16,
   },
   messagesContainer: {
-    flexGrow: 1,
+    flexGrow: 1, // Garante que o container da lista de mensagens ocupe o restante do espaço disponível
+    marginBottom: 16, // Reduzi o espaçamento entre as mensagens e o campo de entrada
   },
   messageContainer: {
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
-    maxWidth: '80%',
-    flexDirection: 'row', 
-    alignItems: 'flex-start',
+    maxWidth: "80%",
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   userMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#FACC15', 
+    alignSelf: "flex-end",
+    backgroundColor: "#FACC15",
   },
   iaMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#fff',
+    alignSelf: "flex-start",
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   iaImage: {
-    width: 40, 
+    width: 40,
     height: 40,
-    borderRadius: 20, 
+    borderRadius: 20,
     marginRight: 10,
   },
   textContainer: {
     flex: 1,
   },
   sender: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
-    color: '#333',
+    color: "#333",
   },
   messageText: {
-    color: '#333',
+    color: "#333",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10, // Ajustei para reduzir o espaço acima do campo de entrada
+    paddingBottom: 20, // Reduzi o padding no final
   },
   input: {
     flex: 1,
     height: 45,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 16,
     marginRight: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     fontSize: 16,
   },
 });
