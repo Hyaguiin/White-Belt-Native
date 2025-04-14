@@ -34,9 +34,15 @@ export default function Login() {
       // Salvar token e dados do usuário
       await AsyncStorage.setItem('@auth_token', token);
       await AsyncStorage.setItem('@user_data', JSON.stringify(user));
+
+      // Caso seja o usuário admin, redireciona para a tela de produtos
+      if (email === 'admin@com.com') {
+        router.replace('/(tabs)/produto'); // Redireciona para a página de produtos
+      } else {
+        // Caso contrário, redireciona para a tela principal
+        router.replace('/(tabs)/BottomTabNavigator');
+      }
       
-      // Redirecionar para a tela principal
-      router.replace('/(tabs)/BottomTabNavigator');
     } catch (error: any) {
       let errorMessage = 'Erro ao fazer login';
       if (error.response) {
@@ -102,7 +108,6 @@ export default function Login() {
   );
 }
 
-// Aqui está a correção - usando 'styles' em vez de 'registerStyles'
 const styles = StyleSheet.create({
   container: {
     flex: 1,

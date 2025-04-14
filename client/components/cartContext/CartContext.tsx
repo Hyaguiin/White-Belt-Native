@@ -26,16 +26,19 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
 
   const carregarCarrinho = async () => {
     try {
-      const produtosResponse = await axios.get(
-        "http://localhost:5000/carrinho/produto"
-      );
+      const produtosResponse = await axios.get("http://localhost:5000/carrinho/produto");
+      console.log("Resposta da API:", produtosResponse.data); // Verifique os dados da resposta da API
+  
+      // Mapear os produtos para adicionar a quantidade
       const produtosData = produtosResponse.data.map((p: any) => ({
         ...p,
-        quantidade: 1,
+        quantidade: 1, // Adiciona a quantidade inicial
       }));
-
+  
+      // Atualiza o estado com os produtos carregados
       setProdutos(produtosData);
-
+  
+      // Se houver produtos, calcula o total
       if (produtosData.length > 0) {
         await calcularTotal();
       }
@@ -43,6 +46,8 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
       console.error("Erro ao carregar carrinho:", error);
     }
   };
+  
+  
 
   const calcularTotal = async () => {
     try {
