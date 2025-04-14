@@ -64,10 +64,8 @@ const Chat: React.FC = () => {
     }
 
     try {
-      // Adiciona mensagem do usuário
       setMessages(prev => [...prev, { text: input, sender: "Você" }]);
       
-      // Envia mensagem para o servidor
       wsRef.current.send(input);
       setInput("");
     } catch (error) {
@@ -129,7 +127,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#000', // Cor de fundo mais suave
+    backgroundColor: '#000', 
   },
   status: {
     textAlign: 'center',
@@ -145,12 +143,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
     maxWidth: '80%',
-    flexDirection: 'row', // Agora as mensagens da IA e usuário estarão alinhadas horizontalmente
+    flexDirection: 'row', 
     alignItems: 'flex-start',
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#FACC15', // Cor para a mensagem do usuário
+    backgroundColor: '#FACC15', 
   },
   iaMessage: {
     alignSelf: 'flex-start',
@@ -159,10 +157,10 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   iaImage: {
-    width: 40, // Tamanho da imagem da IA
+    width: 40, 
     height: 40,
-    borderRadius: 20, // Torna a imagem redonda
-    marginRight: 10, // Espaçamento entre a imagem e o texto
+    borderRadius: 20, 
+    marginRight: 10,
   },
   textContainer: {
     flex: 1,

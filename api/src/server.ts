@@ -21,7 +21,7 @@ const model = genAI.getGenerativeModel({
   },
 });
 
-async function listModels() {
+/*async function listModels() {
   try {
     const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) {
@@ -47,7 +47,7 @@ async function listModels() {
 }
 
 listModels();
-
+*/
 // Servidor WebSocket
 const wss = new WebSocket.Server({ port: WS_PORT }, () => {
   console.log(`Servidor WebSocket ouvindo na porta ${WS_PORT}`);
@@ -68,7 +68,6 @@ wss.on("connection", (ws: WebSocket) => {
         messageString = message.toString('utf-8');
       }
 
-      // Verifica se a mensagem é válida
       if (typeof messageString !== 'string' || messageString.trim().length === 0) {
         console.error('Mensagem inválida:', messageString);
         throw new Error('Mensagem inválida');
@@ -76,7 +75,6 @@ wss.on("connection", (ws: WebSocket) => {
 
       console.log('Mensagem válida:', messageString);
 
-      // Processa a mensagem com o modelo
       const result = await model.generateContent(messageString);
 
       console.log('Resultado da API:', result);
