@@ -6,7 +6,7 @@ interface Message {
   sender: "Você" | "Tombi Xelbo";
 }
 
-const IP = "192.168.0.18";
+const IP = "192.168.1.4";
 const WS_PORT = 6500; // Certifique-se que esta porta corresponde ao servidor
 
 const Chat: React.FC = () => {
