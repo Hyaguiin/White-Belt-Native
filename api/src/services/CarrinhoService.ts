@@ -4,6 +4,7 @@ import { Produto, ProdutoModel } from "../interfaces/Produto";
 import { CharutoModel } from "../interfaces/Charuto";
 import { CavaloModel } from "../interfaces/Cavalo";
 import { WhiskyModel } from "../interfaces/Whisky";
+import { PedidoModel } from "../interfaces/Pedido";
 
 import "dotenv/config";
 
@@ -128,7 +129,6 @@ export const calcularTotalCarrinho = async () => {
 };
 
 /**
- * Lista os produtos do carrinho.
  * @returns A lista de produtos no carrinho.
  */
 export const listarProdutosDoCarrinho = async (): Promise<any[]> => {
@@ -137,7 +137,6 @@ export const listarProdutosDoCarrinho = async (): Promise<any[]> => {
     
     if (!carrinho?.produtos?.length) return [];
 
-    // Se for misto, busca em todos os modelos
     if (carrinho.produtosModelo === 'Misto') {
       const charutos = await CharutoModel.find({ _id: { $in: carrinho.produtos } });
       const whiskys = await WhiskyModel.find({ _id: { $in: carrinho.produtos } });
@@ -145,7 +144,6 @@ export const listarProdutosDoCarrinho = async (): Promise<any[]> => {
       return [...charutos, ...whiskys, ...cavalos];
     }
     
-    // Se não for misto, busca no modelo específico
     switch(carrinho.produtosModelo) {
       case 'Charuto':
         return await CharutoModel.find({ _id: { $in: carrinho.produtos } });
@@ -202,3 +200,50 @@ export async function verificarCarrinhoExistente() {
     console.error("Erro ao verificar carrinho:", err);
   }
 }
+
+export const finalizarPedido = async () => {
+  try {
+    // Buscar o carrinho atual
+    const carrinho = await CarrinhoModel.findById(CARRINHO_ID_FIXO);
+    if (!carrinho) {
+      throw new Error("Carrinho não encontrado");
+    }
+
+    // Verificar se há produtos no carrinho
+    if (carrinho.produtos.length === 0) {
+      throw new Error("Não é possível finalizar pedido - carrinho vazio");
+    }
+
+    const novoPedido = new PedidoModel({
+      produtos: carrinho.produtos,
+      total: carrinho.total,
+      status: "completo" 
+    });
+
+    await novoPedido.save();
+
+    carrinho.produtos = [];
+    carrinho.total = 0;
+    carrinho.produtosModelo = "Charuto";
+    await carrinho.save();
+
+    return {
+      success: true,
+      pedido: novoPedido,
+      message: "Pedido finalizado com sucesso!"
+    };
+  } catch (err) {
+    console.error("Erro ao finalizar pedido:", err);
+    throw err;
+  }
+};
+
+export const listarPedidosAnteriores = async () => {
+  try {
+    const pedidos = await PedidoModel.find().sort({ data: -1 });
+    return pedidos;
+  } catch (err) {
+    console.error("Erro ao listar pedidos:", err);
+    return [];
+  }
+};

@@ -4,6 +4,8 @@ import {
   removerProdutoDoCarrinho,
   calcularTotalCarrinho,
   listarProdutosDoCarrinho,
+  listarPedidosAnteriores,
+  finalizarPedido
 } from "../services/CarrinhoService";
 
 export const adicionarProdutoAoCarrinhoController = async (
@@ -81,5 +83,42 @@ export const listarProdutosDoCarrinhoController = async (
   } catch (err) {
     console.error("Erro no controller:", err); 
     res.status(500).json({ message: err instanceof Error ? err.message : "Erro desconhecido" });
+  }
+};
+
+
+export const finalizarPedidoController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log("Finalizando pedido...");
+    
+    const resultado = await finalizarPedido();
+    
+    res.status(200).json({
+      success: true,
+      pedido: resultado.pedido,
+      message: "Pedido finalizado com sucesso!"
+    });
+  } catch (err) {
+    console.error("Erro no controller finalizarPedido:", err);
+    res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : "Erro ao finalizar pedido"
+    });
+  }
+};
+
+export const listarPedidosAnterioresController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log("Listando pedidos anteriores...");
+    
+    const pedidos = await listarPedidosAnteriores();
+    
+    res.status(200).json(pedidos);
+  } catch (err) {
+    console.error("Erro no controller listarPedidosAnteriores:", err);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao listar pedidos anteriores"
+    });
   }
 };

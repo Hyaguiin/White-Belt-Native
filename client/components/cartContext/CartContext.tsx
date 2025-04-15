@@ -9,7 +9,6 @@ import axios from "axios";
 import { ProdutoNoCarrinho } from "@/interfaces/ProdutoNoCarrinho";
 import { CarrinhoProviderProps } from "@/interfaces/CarrinhoProviderProps";
 import { CarrinhoContextData } from "@/interfaces/FinalizarCompra";
-import { AxiosError } from "axios";
 
 const API_BASE_URL = __DEV__
   ? "http://localhost:5000"
@@ -29,73 +28,59 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
 }) => {
   const [produtos, setProdutos] = useState<ProdutoNoCarrinho[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [carrinhoId, setCarrinhoId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const carregarCarrinho = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const carrinhoResponse = await api.get(`${API_BASE_URL}/carrinho/produto`);
-      if (Array.isArray(carrinhoResponse.data)) {
-        const produtosComQuantidade = carrinhoResponse.data.map((produto: any) => ({
+      const [produtosResponse] = await Promise.all([
+        api.get("/carrinho/produto"),
+      ]);
+
+      setProdutos(
+        produtosResponse.data.map((produto: any) => ({
           ...produto,
-          quantidade: 1, // Exemplo, você pode ajustar a lógica aqui
-          tipo: "Misto", // Ajuste conforme a lógica dos tipos
-        }));
-        setProdutos(produtosComQuantidade);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar o carrinho:", error);
+          quantidade: produto.quantidade || 1,
+        }))
+      );
+    } catch (err) {
+      console.error("Erro ao carregar carrinho:", err);
+      setError("Não foi possível carregar o carrinho");
     } finally {
       setLoading(false);
     }
   };
 
- 
-
-  const calcularTotal = async () => {
-    try {
-      if (!carrinhoId) return;
-
-      const response = await axios.get(
-        `${API_BASE_URL}/carrinho/${carrinhoId}/total`
-      );
-      setTotal(response.data.total);
-    } catch (error) {
-      console.error("Erro ao calcular total:", error);
-    }
-  };
-
   const adicionarAoCarrinho = async (produto: ProdutoNoCarrinho) => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await axios.post(`${API_BASE_URL}/carrinho/adicionar`, {
+      await api.post("/carrinho/adicionar", {
         produtoId: produto._id,
         tipo: produto.tipo,
       });
-
-      if (response.data._id && !carrinhoId) {
-        setCarrinhoId(response.data._id);
-      }
-
       await carregarCarrinho();
-      await calcularTotal();
-    } catch (error) {
-      console.error("Erro ao adicionar ao carrinho:", error);
-      throw error;
+    } catch (err) {
+      console.error("Erro ao adicionar ao carrinho:", err);
+      setError("Não foi possível adicionar o produto ao carrinho");
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   const removerDoCarrinho = async (produtoId: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/carrinho/remover`, {
-        produtoId,
-      });
-
+      await api.post("/carrinho/remover", { produtoId });
       await carregarCarrinho();
-      await calcularTotal();
-    } catch (error) {
-      console.error("Erro ao remover do carrinho:", error);
-      throw error;
+    } catch (err) {
+      console.error("Erro ao remover do carrinho:", err);
+      setError("Não foi possível remover o produto do carrinho");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -105,7 +90,10 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     produtoId: string,
     operacao: "incrementar" | "decrementar"
   ) => {
+    setLoading(true);
+    setError(null);
     try {
+      // Atualiza localmente primeiro para resposta rápida
       setProdutos((prevProdutos) =>
         prevProdutos.map((produto) => {
           if (produto._id === produtoId) {
@@ -113,22 +101,32 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
               operacao === "incrementar"
                 ? produto.quantidade + 1
                 : Math.max(1, produto.quantidade - 1);
-
-            if (novaQuantidade === 0) {
-              removerDoCarrinho(produtoId);
-              return produto;
-            }
-
             return { ...produto, quantidade: novaQuantidade };
           }
           return produto;
         })
       );
 
-      await calcularTotal();
-    } catch (error) {
-      console.error("Erro ao alterar quantidade:", error);
+      // Sincroniza com o backend
+      // (Você pode implementar uma rota específica para atualizar quantidade se necessário)
       await carregarCarrinho();
+    } catch (err) {
+      console.error("Erro ao alterar quantidade:", err);
+      setError("Não foi possível alterar a quantidade");
+      await carregarCarrinho(); // Recarrega o estado real do carrinho
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calcularTotal = async () => {
+    try {
+      const response = await api.get("/carrinho/total");
+      setTotal(response.data.total || 0);
+    } catch (err) {
+      console.error("Erro ao calcular total:", err);
+      setError("Não foi possível calcular o total");
+      throw err;
     }
   };
 
@@ -141,27 +139,37 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
       quantidade: number;
     }>;
   }) => {
+    setLoading(true);
+    setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/compras/finalizar`, dadosCompra);
+      const response = await api.post("/carrinho/finalizar", dadosCompra);
+      // Limpa o carrinho após finalização
       setProdutos([]);
       setTotal(0);
-    } catch (error) {
-      console.error("Erro ao finalizar compra:", error);
-      throw error;
+      return response.data;
+    } catch (err) {
+      console.error("Erro ao finalizar compra:", err);
+      setError("Não foi possível finalizar a compra");
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
-
+  // Carrega o carrinho quando o provider é montado
+  useEffect(() => {
+    carregarCarrinho();
+  }, []);
 
   return (
     <CarrinhoContext.Provider
       value={{
         produtos,
         total,
-        carregarCarrinho, // Garanta que está incluída aqui
         adicionarAoCarrinho,
         removerDoCarrinho,
         alterarQuantidade,
+        carregarCarrinho,
         calcularTotal,
         finalizarCompra,
       }}
@@ -170,4 +178,5 @@ export const CarrinhoProvider: React.FC<CarrinhoProviderProps> = ({
     </CarrinhoContext.Provider>
   );
 };
-  export const useCart = () => useContext(CarrinhoContext);
+
+export const useCart = () => useContext(CarrinhoContext);

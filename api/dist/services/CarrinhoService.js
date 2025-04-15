@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listarProdutosDoCarrinho = exports.calcularTotalCarrinho = exports.removerProdutoDoCarrinho = exports.adicionarProdutoAoCarrinho = void 0;
+exports.listarPedidosAnteriores = exports.finalizarPedido = exports.listarProdutosDoCarrinho = exports.calcularTotalCarrinho = exports.removerProdutoDoCarrinho = exports.adicionarProdutoAoCarrinho = void 0;
 exports.criarCarrinhoInicial = criarCarrinhoInicial;
 exports.verificarCarrinhoExistente = verificarCarrinhoExistente;
 const mongoose_1 = require("mongoose");
@@ -8,6 +8,7 @@ const Carrinho_1 = require("../interfaces/Carrinho");
 const Charuto_1 = require("../interfaces/Charuto");
 const Cavalo_1 = require("../interfaces/Cavalo");
 const Whisky_1 = require("../interfaces/Whisky");
+const Pedido_1 = require("../interfaces/Pedido");
 require("dotenv/config");
 const CARRINHO_ID_FIXO = process.env.CARRINHO_ID_FIXO;
 /**
@@ -111,7 +112,6 @@ const calcularTotalCarrinho = async () => {
 };
 exports.calcularTotalCarrinho = calcularTotalCarrinho;
 /**
- * Lista os produtos do carrinho.
  * @returns A lista de produtos no carrinho.
  */
 const listarProdutosDoCarrinho = async () => {
@@ -119,14 +119,12 @@ const listarProdutosDoCarrinho = async () => {
         const carrinho = await Carrinho_1.CarrinhoModel.findById(CARRINHO_ID_FIXO).exec();
         if (!carrinho?.produtos?.length)
             return [];
-        // Se for misto, busca em todos os modelos
         if (carrinho.produtosModelo === 'Misto') {
             const charutos = await Charuto_1.CharutoModel.find({ _id: { $in: carrinho.produtos } });
             const whiskys = await Whisky_1.WhiskyModel.find({ _id: { $in: carrinho.produtos } });
             const cavalos = await Cavalo_1.CavaloModel.find({ _id: { $in: carrinho.produtos } });
             return [...charutos, ...whiskys, ...cavalos];
         }
-        // Se não for misto, busca no modelo específico
         switch (carrinho.produtosModelo) {
             case 'Charuto':
                 return await Charuto_1.CharutoModel.find({ _id: { $in: carrinho.produtos } });
@@ -184,3 +182,47 @@ async function verificarCarrinhoExistente() {
         console.error("Erro ao verificar carrinho:", err);
     }
 }
+const finalizarPedido = async () => {
+    try {
+        // Buscar o carrinho atual
+        const carrinho = await Carrinho_1.CarrinhoModel.findById(CARRINHO_ID_FIXO);
+        if (!carrinho) {
+            throw new Error("Carrinho não encontrado");
+        }
+        // Verificar se há produtos no carrinho
+        if (carrinho.produtos.length === 0) {
+            throw new Error("Não é possível finalizar pedido - carrinho vazio");
+        }
+        const novoPedido = new Pedido_1.PedidoModel({
+            produtos: carrinho.produtos,
+            total: carrinho.total,
+            status: "completo"
+        });
+        await novoPedido.save();
+        carrinho.produtos = [];
+        carrinho.total = 0;
+        carrinho.produtosModelo = "Charuto";
+        await carrinho.save();
+        return {
+            success: true,
+            pedido: novoPedido,
+            message: "Pedido finalizado com sucesso!"
+        };
+    }
+    catch (err) {
+        console.error("Erro ao finalizar pedido:", err);
+        throw err;
+    }
+};
+exports.finalizarPedido = finalizarPedido;
+const listarPedidosAnteriores = async () => {
+    try {
+        const pedidos = await Pedido_1.PedidoModel.find().sort({ data: -1 });
+        return pedidos;
+    }
+    catch (err) {
+        console.error("Erro ao listar pedidos:", err);
+        return [];
+    }
+};
+exports.listarPedidosAnteriores = listarPedidosAnteriores;

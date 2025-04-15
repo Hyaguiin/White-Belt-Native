@@ -17,7 +17,7 @@ interface Message {
 }
 
 const IP = "192.168.0.18";
-const WS_PORT = 6500; // Certifique-se que esta porta corresponde ao servidor
+const WS_PORT = 6500; 
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([

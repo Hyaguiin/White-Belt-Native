@@ -10,4 +10,6 @@ router.post("/adicionar", CarrinhoController_1.adicionarProdutoAoCarrinhoControl
 router.post("/remover", CarrinhoController_1.removerProdutoDoCarrinhoController);
 router.get("/:carrinhoId/total", CarrinhoController_1.calcularTotalCarrinhoController);
 router.get("/produto", CarrinhoController_1.listarProdutosDoCarrinhoController);
+router.post("/finalizar", CarrinhoController_1.finalizarPedidoController);
+router.get("/pedidos", CarrinhoController_1.listarPedidosAnterioresController);
 exports.default = router;

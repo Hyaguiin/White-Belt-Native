@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listarProdutosDoCarrinhoController = exports.calcularTotalCarrinhoController = exports.removerProdutoDoCarrinhoController = exports.adicionarProdutoAoCarrinhoController = void 0;
+exports.listarPedidosAnterioresController = exports.finalizarPedidoController = exports.listarProdutosDoCarrinhoController = exports.calcularTotalCarrinhoController = exports.removerProdutoDoCarrinhoController = exports.adicionarProdutoAoCarrinhoController = void 0;
 const CarrinhoService_1 = require("../services/CarrinhoService");
 const adicionarProdutoAoCarrinhoController = async (req, res) => {
     try {
@@ -65,3 +65,37 @@ const listarProdutosDoCarrinhoController = async (req, res) => {
     }
 };
 exports.listarProdutosDoCarrinhoController = listarProdutosDoCarrinhoController;
+const finalizarPedidoController = async (req, res) => {
+    try {
+        console.log("Finalizando pedido...");
+        const resultado = await (0, CarrinhoService_1.finalizarPedido)();
+        res.status(200).json({
+            success: true,
+            pedido: resultado.pedido,
+            message: "Pedido finalizado com sucesso!"
+        });
+    }
+    catch (err) {
+        console.error("Erro no controller finalizarPedido:", err);
+        res.status(500).json({
+            success: false,
+            message: err instanceof Error ? err.message : "Erro ao finalizar pedido"
+        });
+    }
+};
+exports.finalizarPedidoController = finalizarPedidoController;
+const listarPedidosAnterioresController = async (req, res) => {
+    try {
+        console.log("Listando pedidos anteriores...");
+        const pedidos = await (0, CarrinhoService_1.listarPedidosAnteriores)();
+        res.status(200).json(pedidos);
+    }
+    catch (err) {
+        console.error("Erro no controller listarPedidosAnteriores:", err);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao listar pedidos anteriores"
+        });
+    }
+};
+exports.listarPedidosAnterioresController = listarPedidosAnterioresController;
