@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const API_BASE_URL = __DEV__ 
   ? 'http://3.133.146.147' 
-  : 'https://seuservidor.com'; 
+  : 'https://3.133.146.147'; 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
