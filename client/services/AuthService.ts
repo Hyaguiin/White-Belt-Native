@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 
 
 const API_BASE_URL = __DEV__ 
-  ? 'http://localhost:5000' 
-  : 'https://seuservidor.com'; 
+  ? 'http://3.133.146.147' 
+  : 'https:/3.133.146.147'; 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
