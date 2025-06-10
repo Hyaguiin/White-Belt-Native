@@ -16,7 +16,7 @@ import authRoutes from "../routes/AuthRoutes";
 
 export const app = express();
 
-let url = ["https://hoppscotch.io", "http://localhost:8081"];
+let url = ["https://hoppscotch.io", "http://localhost:8081", "http://18.219.153.118"];
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: Function) => {
