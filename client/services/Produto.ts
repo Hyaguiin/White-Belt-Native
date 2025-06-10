@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 const API_BASE_URL = __DEV__ 
-  ? 'http://localhost:5000' 
+  ? 'http://3.133.146.147' 
   : 'https://seuservidor.com'; 
 
 const api = axios.create({
