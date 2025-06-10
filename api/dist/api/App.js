@@ -15,7 +15,7 @@ const CarrinhoRoutes_1 = __importDefault(require("../routes/CarrinhoRoutes"));
 const CarrinhoService_1 = require("../services/CarrinhoService");
 const AuthRoutes_1 = __importDefault(require("../routes/AuthRoutes"));
 exports.app = (0, express_1.default)();
-let url = ["https://hoppscotch.io", "http://localhost:8081"];
+let url = ["https://hoppscotch.io", "http://localhost:8081", "http://18.219.153.118"];
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin || url.includes(origin)) {
