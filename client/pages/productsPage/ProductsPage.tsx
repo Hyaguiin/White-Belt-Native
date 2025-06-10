@@ -19,9 +19,9 @@ export default function ProdutoPage() {
         setLoading(true);
         
         const [charutos, whiskies, cavalos] = await Promise.all([
-          axios.get('http://localhost:5000/charuto'),
-          axios.get('http://localhost:5000/whisky'),
-          axios.get('http://localhost:5000/cavalo')
+          axios.get('http://3.133.146.147/charuto'),
+          axios.get('http://3.133.146.147/whisky'),
+          axios.get('http://3.133.146.147/cavalo')
         ]);
 
         const produtosCombinados = [
